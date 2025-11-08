@@ -1,0 +1,2 @@
+export { FeaturedColleges } from "./FeaturedColleges";
+

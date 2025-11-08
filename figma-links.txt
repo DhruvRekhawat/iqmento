@@ -1,0 +1,58 @@
+Navigation bar
+https://www.figma.com/design/CPXOXVLZryID1H8Sef6OGB/IQMento---College-Insider?node-id=35-52&t=v5uqArB1NDRYVS1J-4
+
+description: pill shaped, glass effect,
+
+Hero:
+https://www.figma.com/design/CPXOXVLZryID1H8Sef6OGB/IQMento---College-Insider?node-id=35-64&t=v5uqArB1NDRYVS1J-4
+
+images: public\hero
+
+Features
+https://www.figma.com/design/CPXOXVLZryID1H8Sef6OGB/IQMento---College-Insider?node-id=35-76&t=v5uqArB1NDRYVS1J-4
+
+images: public\features
+
+Roadmap
+https://www.figma.com/design/CPXOXVLZryID1H8Sef6OGB/IQMento---College-Insider?node-id=35-146&t=v5uqArB1NDRYVS1J-4
+
+background: public\roadmap
+
+Who is this for?
+https://www.figma.com/design/CPXOXVLZryID1H8Sef6OGB/IQMento---College-Insider?node-id=93-207&t=v5uqArB1NDRYVS1J-4
+
+description: the cards pop up a bit on hover. rotate, translate upwards
+
+images: public\features (use 1,2 and 3)
+
+Alumini
+https://www.figma.com/design/CPXOXVLZryID1H8Sef6OGB/IQMento---College-Insider?node-id=110-2959&t=v5uqArB1NDRYVS1J-4
+
+description: autoscroll carousel
+placeholder: public\alumini-placeholder.png
+
+Alumini Features
+https://www.figma.com/design/CPXOXVLZryID1H8Sef6OGB/IQMento---College-Insider?node-id=44-257&t=v5uqArB1NDRYVS1J-4
+
+Featured Colleges
+https://www.figma.com/design/CPXOXVLZryID1H8Sef6OGB/IQMento---College-Insider?node-id=135-986&t=v5uqArB1NDRYVS1J-4
+
+placeholder: public\alumini-placeholder.png
+
+Testimonials
+https://www.figma.com/design/CPXOXVLZryID1H8Sef6OGB/IQMento---College-Insider?node-id=44-237&t=v5uqArB1NDRYVS1J-4
+
+description: autoscroll carousel
+
+CTA
+https://www.figma.com/design/CPXOXVLZryID1H8Sef6OGB/IQMento---College-Insider?node-id=44-476&t=v5uqArB1NDRYVS1J-4
+
+image: public\features\3.svg
+
+Footer
+https://www.figma.com/design/CPXOXVLZryID1H8Sef6OGB/IQMento---College-Insider?node-id=45-107&t=v5uqArB1NDRYVS1J-4
+
+
+Full Home page:
+https://www.figma.com/design/CPXOXVLZryID1H8Sef6OGB/IQMento---College-Insider?node-id=35-51&t=v5uqArB1NDRYVS1J-4
+
