@@ -1,0 +1,31 @@
+page: /about-us
+
+sections:
+hero: https://www.figma.com/design/d1RMn4m7cnVVNbovheA63f/IQMento---College-Insider--Copy-?node-id=93-1147&t=yTMz03ibynTLJ42w-4
+similar to hero in landing page (/)
+image public\aboutus\hero.png
+
+
+
+our story
+https://www.figma.com/design/d1RMn4m7cnVVNbovheA63f/IQMento---College-Insider--Copy-?node-id=93-1171&t=yTMz03ibynTLJ42w-4
+image: public\aboutus\our-story.png
+
+
+
+our mission
+https://www.figma.com/design/d1RMn4m7cnVVNbovheA63f/IQMento---College-Insider--Copy-?node-id=93-1176&t=yTMz03ibynTLJ42w-4
+background same as roadmap
+
+
+what we do
+https://www.figma.com/design/d1RMn4m7cnVVNbovheA63f/IQMento---College-Insider--Copy-?node-id=93-1281&t=yTMz03ibynTLJ42w-4
+
+
+what we believe
+https://www.figma.com/design/d1RMn4m7cnVVNbovheA63f/IQMento---College-Insider--Copy-?node-id=103-313&t=yTMz03ibynTLJ42w-4
+
+CTA (component already exists)
+
+Footer (component already exists)
+

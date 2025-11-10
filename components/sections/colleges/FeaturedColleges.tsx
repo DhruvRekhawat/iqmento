@@ -1,63 +1,72 @@
+import type { ReactNode } from "react";
+import { MapPin, Users2 } from "lucide-react";
 import Image from "next/image";
 
-import { Container } from "@/components/shared/container";
+import { Section } from "@/components/shared/section";
 
-interface CollegeCardProps {
+interface College {
   name: string;
   description: string;
   mentors: number;
   reviews: number;
+  location: string;
   image: string;
 }
 
-const MOST_BOOKED: CollegeCardProps[] = [
+const MOST_BOOKED: College[] = [
   {
     name: "Indian Institute of Technology, Delhi",
+    location: "New Delhi, India",
     description:
-      "Engineering meets innovation—connect with alumni now leading at Google and Tesla.",
+      "Engineering meets innovation — get mentored by alumni now leading at Google and Tesla.",
     mentors: 15,
     reviews: 42,
     image: "/college-placeholder.svg",
   },
   {
     name: "Indian Institute of Management, Bangalore",
+    location: "Bengaluru, India",
     description:
-      "Decode admissions essays, interviews, and campus culture with seasoned mentors.",
+      "Decode essays, interviews, and campus life with mentors who cracked the IIM journey.",
     mentors: 18,
     reviews: 38,
     image: "/college-placeholder.svg",
   },
   {
     name: "Georgia Institute of Technology",
+    location: "Atlanta, USA",
     description:
-      "Navigate international admissions, scholarships, and STEM pathways with clarity.",
+      "Navigate international admissions, co-ops, and STEM pathways with alumni across the US.",
     mentors: 12,
     reviews: 27,
     image: "/college-placeholder.svg",
   },
 ];
 
-const RISING: CollegeCardProps[] = [
+const RISING: College[] = [
   {
     name: "BITS Pilani",
+    location: "Pilani, India",
     description:
-      "Understand dual degrees, practice schools, and startup ecosystems from insiders.",
+      "Understand dual degrees, practice schools, and the startup culture from BITSians themselves.",
     mentors: 11,
     reviews: 26,
     image: "/college-placeholder.svg",
   },
   {
     name: "University of Toronto",
+    location: "Toronto, Canada",
     description:
-      "Plan your global undergraduate journey with guidance on co-ops and research tracks.",
+      "Plan your global undergraduate journey with clarity on research tracks, housing, and co-ops.",
     mentors: 9,
     reviews: 22,
     image: "/college-placeholder.svg",
   },
   {
     name: "Ashoka University",
+    location: "Sonipat, India",
     description:
-      "Explore interdisciplinary majors, financial aid, and vibrant campus life with mentors.",
+      "Explore interdisciplinary majors, the YIF pathway, and scholarships with current students.",
     mentors: 7,
     reviews: 18,
     image: "/college-placeholder.svg",
@@ -66,47 +75,43 @@ const RISING: CollegeCardProps[] = [
 
 export function FeaturedColleges() {
   return (
-    <section id="colleges" className="bg-white py-24 sm:py-32">
-      <Container>
+    <Section
+      id="featured-colleges"
+      bleed
+      spacing="loose"
+      className="relative overflow-hidden bg-[#010101] py-24 text-white sm:py-28"
+    >
+      <BackgroundLines />
+
+      <div className="mx-auto flex w-full max-w-[1180px] flex-col gap-16 px-4 sm:px-6 lg:px-10">
         <header className="flex flex-col items-center gap-4 text-center">
-          <h2 className="text-4xl font-medium leading-tight tracking-tight text-foreground-strong sm:text-5xl md:text-[3.5rem]">
+          <h2 className="text-pretty text-[clamp(3rem,3vw+2rem,4.5rem)] font-medium leading-[0.9] tracking-[-0.04em]">
             Featured Colleges
           </h2>
-          <p className="text-lg text-foreground-muted sm:max-w-2xl sm:text-xl">
+          <p className="max-w-2xl text-lg leading-[1.6] text-[#a1a1a1] sm:text-xl">
             See where students are connecting the most this week.
           </p>
         </header>
 
-        <div className="mt-16 flex flex-col gap-14">
-          <CollegeGroup
-            title="Most Booked Mentors This Week"
-            colleges={MOST_BOOKED}
-          />
-          <CollegeGroup title="Rising Colleges" colleges={RISING} />
-        </div>
-      </Container>
-    </section>
+        <CollegeGroup title="Most Booked Mentors This Week" colleges={MOST_BOOKED} />
+        <CollegeGroup title="Rising Colleges" colleges={RISING} />
+      </div>
+    </Section>
   );
 }
 
-function CollegeGroup({
-  title,
-  colleges,
-}: {
-  title: string;
-  colleges: CollegeCardProps[];
-}) {
+function CollegeGroup({ title, colleges }: { title: string; colleges: College[] }) {
   return (
-    <div className="flex flex-col gap-8">
-      <h3 className="text-center text-3xl font-semibold tracking-tight text-[#4e4e4e] sm:text-4xl">
+    <section className="flex flex-col gap-10">
+      <h3 className="text-center text-[clamp(2rem,1.6vw+1.6rem,2.75rem)] font-medium tracking-[-0.03em] text-[#a9a9a9]">
         {title}
       </h3>
-      <div className="grid gap-8 lg:grid-cols-3">
+      <div className="grid gap-10 lg:grid-cols-3">
         {colleges.map((college) => (
           <CollegeCard key={college.name} {...college} />
         ))}
       </div>
-    </div>
+    </section>
   );
 }
 
@@ -115,77 +120,79 @@ function CollegeCard({
   description,
   mentors,
   reviews,
+  location,
   image,
-}: CollegeCardProps) {
+}: College) {
   return (
-    <article className="flex h-full flex-col gap-6 rounded-3xl border border-[rgba(16,19,34,0.08)] bg-[#f1f1f1] p-6 shadow-soft transition-transform duration-300 hover:-translate-y-2 hover:shadow-card">
-      <div className="relative h-40 overflow-hidden rounded-2xl bg-[#626262]">
+    <article className="flex h-full flex-col gap-6 rounded-[24px] border border-white/10 bg-[#242424] p-6 shadow-[0_40px_120px_-60px_rgba(0,0,0,0.65)] transition-transform duration-300 hover:-translate-y-2 hover:shadow-[0_40px_140px_-50px_rgba(79,57,246,0.45)]">
+      <div className="relative h-36 w-full overflow-hidden rounded-2xl bg-[#181818]">
         <Image
           src={image}
           alt={name}
           fill
-          className="object-cover object-center opacity-60"
+          sizes="(max-width: 1024px) 100vw, 360px"
+          className="object-cover opacity-70"
         />
       </div>
 
-      <div className="flex flex-col gap-5">
-        <div className="flex items-center gap-3 text-sm text-[#535353]">
-          <RatingStars />
-          <span>{reviews} Reviews</span>
-        </div>
+      <div className="flex items-center gap-2 text-sm font-medium text-[#9e9e9e]">
+        <StarRow />
+        <span>{reviews} Reviews</span>
+      </div>
 
-        <h4 className="text-2xl font-semibold leading-snug tracking-[-0.02em] text-[#2c2c2c]">
-          {name}
-        </h4>
-        <p className="text-sm leading-relaxed text-[#535353]">{description}</p>
+      <h4 className="text-[1.6rem] font-semibold leading-tight tracking-[-0.02em] text-white">
+        {name}
+      </h4>
 
-        <div className="flex items-center gap-3 text-sm font-medium text-[#535353]">
-          <svg
-            width="18"
-            height="16"
-            viewBox="0 0 18 16"
-            fill="none"
-            aria-hidden
-          >
-            <path
-              d="M6.333 9.333a3.167 3.167 0 1 0 0-6.333 3.167 3.167 0 0 0 0 6.333ZM11.667 15c0-2.209-2.387-4-5.333-4-2.947 0-5.334 1.791-5.334 4"
-              stroke="#535353"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-            />
-            <path
-              d="M12.667 6.333a2.333 2.333 0 1 0 0-4.666 2.333 2.333 0 0 0 0 4.666ZM17 13.667c0-1.86-2.06-3.367-4.333-3.367-.713 0-1.39.112-2 .31"
-              stroke="#535353"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-            />
-          </svg>
-          {mentors} Mentors Available
-        </div>
+      <p className="text-sm leading-relaxed text-[#bebebe]">{description}</p>
+
+      <div className="mt-auto flex flex-col gap-3 text-sm font-medium text-[#c2c2c2]">
+        <InfoRow icon={<MapPin className="h-4 w-4" />} label={location} />
+        <InfoRow
+          icon={<Users2 className="h-4 w-4" />}
+          label={`${mentors} Mentors Available`}
+        />
       </div>
     </article>
   );
 }
 
-function RatingStars() {
+function InfoRow({ icon, label }: { icon: ReactNode; label: string }) {
   return (
-    <div className="flex items-center gap-1">
+    <span className="flex items-center gap-3">
+      <span className="text-[#9747ff]">{icon}</span>
+      <span>{label}</span>
+    </span>
+  );
+}
+
+function StarRow() {
+  return (
+    <span className="flex items-center gap-1 text-[#9747ff]">
       {Array.from({ length: 5 }).map((_, index) => (
         <svg
           key={index}
-          width="16"
-          height="15"
-          viewBox="0 0 16 15"
-          fill="none"
-          aria-hidden
+          width="18"
+          height="18"
+          viewBox="0 0 18 18"
+          fill="currentColor"
+          xmlns="http://www.w3.org/2000/svg"
         >
-          <path
-            d="M7.235 1.665c.3-.724 1.307-.724 1.607 0l1.1 2.65c.12.29.375.492.678.527l2.838.327c.79.091 1.107 1.064.515 1.608l-2.15 1.99a.917.917 0 0 0-.276.83l.63 2.804c.176.78-.668 1.394-1.35.997l-2.429-1.39a.917.917 0 0 0-.895 0l-2.43 1.39c-.681.397-1.525-.217-1.35-.998l.631-2.804a.917.917 0 0 0-.276-.829L1.027 6.777c-.592-.544-.275-1.517.515-1.608l2.838-.327a.917.917 0 0 0 .678-.527l1.1-2.65Z"
-            fill="#9747FF"
-          />
+          <path d="M8.227 1.812c.3-.8 1.246-.8 1.546 0l1.253 3.342a.9.9 0 0 0 .636.57l3.512.8c.844.193 1.017.97.385 1.524l-2.684 2.374a.9.9 0 0 0-.268.85l.684 3.467c.164.834-.48 1.294-1.222.96l-3.172-1.429a.9.9 0 0 0-.716 0L4.309 15.7c-.74.334-1.386-.126-1.221-.96l.683-3.467a.9.9 0 0 0-.268-.85L.819 8.048c-.632-.554-.459-1.331.385-1.524l3.512-.8a.9.9 0 0 0 .636-.57l1.253-3.342Z" />
         </svg>
       ))}
-    </div>
+    </span>
+  );
+}
+
+function BackgroundLines() {
+  return (
+    <>
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_100%_0%,rgba(151,71,255,0.2)_0%,transparent_55%),radial-gradient(circle_at_0%_100%,rgba(79,57,246,0.2)_0%,transparent_60%)]" />
+      <div className="pointer-events-none absolute left-0 right-0 top-[360px] h-[2px] bg-gradient-to-r from-transparent via-white/80 to-transparent" />
+      <div className="pointer-events-none absolute left-0 right-0 top-[620px] h-[2px] bg-gradient-to-r from-transparent via-white/80 to-transparent" />
+      <div className="pointer-events-none absolute left-0 right-0 top-[880px] h-[2px] bg-gradient-to-r from-transparent via-white/80 to-transparent" />
+    </>
   );
 }
 

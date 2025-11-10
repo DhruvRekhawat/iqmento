@@ -1,3 +1,4 @@
+
 import { Container } from "@/components/shared/container";
 
 const FAQ_ITEMS = [

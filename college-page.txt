@@ -1,0 +1,27 @@
+particular college page --> /colleges/[slug]
+
+entire page: https://www.figma.com/design/d1RMn4m7cnVVNbovheA63f/IQMento---College-Insider--Copy-?node-id=110-770&t=yTMz03ibynTLJ42w-4
+
+hero:
+https://www.figma.com/design/d1RMn4m7cnVVNbovheA63f/IQMento---College-Insider--Copy-?node-id=110-811&t=yTMz03ibynTLJ42w-4
+
+about:
+https://www.figma.com/design/d1RMn4m7cnVVNbovheA63f/IQMento---College-Insider--Copy-?node-id=110-826&t=yTMz03ibynTLJ42w-4
+
+admission process
+https://www.figma.com/design/d1RMn4m7cnVVNbovheA63f/IQMento---College-Insider--Copy-?node-id=110-1041&t=yTMz03ibynTLJ42w-4
+
+top recruiters
+https://www.figma.com/design/d1RMn4m7cnVVNbovheA63f/IQMento---College-Insider--Copy-?node-id=110-1164&t=yTMz03ibynTLJ42w-4
+
+reviews --> autoplay carousel
+https://www.figma.com/design/d1RMn4m7cnVVNbovheA63f/IQMento---College-Insider--Copy-?node-id=110-2136&t=yTMz03ibynTLJ42w-4
+
+alumini
+https://www.figma.com/design/d1RMn4m7cnVVNbovheA63f/IQMento---College-Insider--Copy-?node-id=110-2993&t=yTMz03ibynTLJ42w-4
+
+faq:
+https://www.figma.com/design/d1RMn4m7cnVVNbovheA63f/IQMento---College-Insider--Copy-?node-id=110-2494&t=yTMz03ibynTLJ42w-4
+
+last two components, CTA and Footer are already there.
+copy the design exactly and use common components which are there
