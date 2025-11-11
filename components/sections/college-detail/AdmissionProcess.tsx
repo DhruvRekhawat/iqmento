@@ -11,7 +11,7 @@ export function AdmissionProcessSection({ admission }: AdmissionProcessSectionPr
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_10%_10%,rgba(91,112,255,0.28)_0%,rgba(5,5,5,0)_55%),linear-gradient(180deg,rgba(5,5,5,0.95)_0%,rgba(5,5,5,1)_100%)]" />
       <Container className="relative z-10 flex flex-col gap-16">
         <header className="flex flex-col items-center gap-6 text-center">
-          <h2 className="text-balance text-5xl font-medium leading-[0.88] tracking-[-0.04em] sm:text-[3.2rem]">
+          <h2 className="text-balance text-5xl font-medium leading-[0.88] tracking-[-0.04em] sm:text-[3.2rem] text-white">
             {admission.title}
           </h2>
           <p className="max-w-2xl text-lg text-white/65">{admission.subtitle}</p>

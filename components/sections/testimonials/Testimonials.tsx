@@ -37,7 +37,7 @@ export function Testimonials() {
   return (
     <section
       id="testimonials"
-      className="bg-white py-24 sm:py-32"
+      className="bg-white py-24 sm:py-32 pb-0 sm:pb-0"
     >
       <Container>
         <div className="flex flex-col gap-14">
@@ -46,7 +46,7 @@ export function Testimonials() {
               Why Students Trust Us
             </h2>
             <p className="max-w-2xl text-base leading-relaxed text-foreground-muted sm:text-lg">
-              Because we connect you with people who’ve lived it—not just talked
+              Because we connect you with people who&apos;ve lived it—not just talked
               about it.
             </p>
           </header>
@@ -72,7 +72,7 @@ interface TestimonialCardProps {
 
 function TestimonialCard({ quote, name, context }: TestimonialCardProps) {
   return (
-    <blockquote className="flex w-[320px] shrink-0 flex-col gap-6 rounded-3xl border border-[rgba(16,19,34,0.08)] bg-gradient-to-br from-[#f6f3ff] via-white to-white p-8 text-left shadow-soft transition-transform duration-300 hover:-translate-y-2 hover:shadow-card">
+    <blockquote className="flex w-[320px] shrink-0 flex-col gap-6 rounded-3xl border border-[rgba(16,19,34,0.08)] bg-linear-to-br from-[#f6f3ff] via-white to-white p-8 text-left shadow-soft transition-transform duration-300 hover:-translate-y-2 hover:shadow-card">
       <span className="text-[2.5rem] leading-none text-[#4f39f6]">“</span>
       <p className="text-base leading-relaxed text-foreground-soft">{quote}</p>
       <footer className="mt-2 flex flex-col gap-1 text-sm font-medium text-foreground-strong">

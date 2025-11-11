@@ -16,7 +16,7 @@ export function OtherAlumniSection({ currentSlug }: OtherAlumniSectionProps) {
     <section className="bg-black py-24 text-white sm:py-32">
       <Container className="flex flex-col gap-12">
         <header className="flex flex-col items-center gap-4 text-center">
-          <h2 className="text-pretty text-4xl font-medium leading-tight tracking-[-0.045em] sm:text-[2.9rem]">
+          <h2 className="text-pretty text-white text-4xl font-medium leading-tight tracking-[-0.045em] sm:text-[2.9rem]">
             Other Alumni
           </h2>
           <p className="max-w-2xl text-base leading-relaxed text-white/65 sm:text-lg">
@@ -25,8 +25,6 @@ export function OtherAlumniSection({ currentSlug }: OtherAlumniSectionProps) {
         </header>
 
         <div className="relative">
-          <div className="pointer-events-none absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-black via-black/70 to-transparent" />
-          <div className="pointer-events-none absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-black via-black/70 to-transparent" />
 
           <div className="marquee-mask overflow-hidden">
             <div className="marquee-track gap-8">

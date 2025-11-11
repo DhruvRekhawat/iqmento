@@ -34,7 +34,7 @@ const BELIEFS = [
 export function WhatWeBelieve() {
   return (
     <Section id="what-we-believe" className="bg-white">
-      <div className="flex flex-col gap-12 lg:flex-row lg:items-start lg:justify-between">
+      <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between">
         <div className="flex max-w-sm flex-col gap-6">
           <h2 className="text-pretty text-[clamp(2.75rem,3vw+1.6rem,4rem)] font-medium leading-[0.9] tracking-[-0.05em] text-[#0b0b0f]">
             What We Believe
@@ -45,18 +45,28 @@ export function WhatWeBelieve() {
           {BELIEFS.map((belief) => (
             <article
               key={belief.copy.join("-")}
-              className={`flex h-full flex-col gap-4 rounded-[28px] border border-[#dbe2f0]/40 bg-white/90 p-10 backdrop-blur-sm ${belief.background}`}
+              className={`flex h-full flex-col gap-4 rounded-[16px] border border-[#dbe2f0]/40 bg-white/90 p-6 backdrop-blur-sm ${belief.background}`}
             >
-              {belief.copy.map((line) =>
+              {/* Bold first line, smaller + normal subsequent lines */}
+              {belief.copy.map((line, idx) =>
                 line ? (
-                  <p
-                    key={line}
-                    className={`text-lg leading-[1.5] tracking-[-0.01em] ${belief.textClass}`}
-                  >
-                    {line}
-                  </p>
+                  idx === 0 ? (
+                    <p
+                      key={`bold-${line}`}
+                      className={`text-lg font-bold leading-normal tracking-[-0.01em] ${belief.textClass}`}
+                    >
+                      {line}
+                    </p>
+                  ) : (
+                    <p
+                      key={`normal-${line}`}
+                      className={`text-base font-normal leading-normal tracking-[-0.01em] ${belief.textClass}`}
+                    >
+                      {line}
+                    </p>
+                  )
                 ) : (
-                  <span key="spacer" aria-hidden className="h-2" />
+                  <span key={`spacer-${idx}`} aria-hidden className="h-2" />
                 )
               )}
             </article>

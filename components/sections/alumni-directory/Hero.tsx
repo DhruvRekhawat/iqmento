@@ -1,78 +1,62 @@
 import Image from "next/image";
 import { Search } from "lucide-react";
 
-import { Container } from "@/components/shared/container";
+import { Section } from "@/components/shared/section";
 
 export function AlumniDirectoryHero() {
   return (
-    <section className="relative isolate overflow-hidden bg-black py-16 text-white sm:py-24">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_25%,rgba(255,255,255,0.28)_0%,rgba(0,0,0,0)_62%)]" />
-      <Container className="relative z-10">
-        <div className="grid items-center gap-16 rounded-[32px] border border-white/10 bg-white/5 p-10 shadow-[0_60px_160px_-90px_rgba(21,21,35,0.85)] backdrop-blur-[24px] lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.05fr)] lg:p-14">
-          <div className="flex flex-col gap-10">
-            <div className="flex flex-col gap-6">
-              <h1 className="text-balance text-[3rem] font-medium leading-[0.9] tracking-[-0.05em] sm:text-[3.25rem] lg:text-[3.75rem]">
-                Find Your Alumni Mentor
-              </h1>
-              <p className="max-w-xl text-lg leading-relaxed text-white/70 sm:text-xl">
-                Get honest, 1:1 guidance from people who’ve been exactly where you want to go.
-              </p>
-            </div>
+    <Section id="alumni-directory-hero" variant="hero" spacing="loose" bleed className="h-fit">
+      <div className="relative overflow-hidden rounded-[16px] border border-[#b0b0b0] bg-white px-6 pb-0 pt-16 sm:px-10 sm:pt-20">
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(228,231,244,0.35)_1px,transparent_1px),linear-gradient(180deg,rgba(228,231,244,0.35)_1px,transparent_1px)] bg-size-[92px_92px]" />
 
-            <form className="group flex max-w-xl items-center gap-3 rounded-full border border-white/15 bg-white/10 px-6 py-4 text-sm text-white/70 shadow-[0_28px_80px_-60px_rgba(79,57,246,0.75)] transition focus-within:border-white/35">
-              <Search className="h-5 w-5 text-white/60 transition group-focus-within:text-white" />
-              <input
-                type="search"
-                placeholder="Search colleges or mentors…"
-                className="w-full bg-transparent text-base text-white placeholder:text-white/50 focus-visible:outline-none"
-              />
-            </form>
+        <div className="relative mx-auto flex max-w-5xl flex-col items-start gap-6 text-center">
+          <div className="flex flex-col items-center gap-6">
+            <h1 className="text-balance text-[3.25rem] font-semibold leading-[0.92] tracking-[-0.05em] text-[#060510] sm:text-[3.75rem] lg:text-[4rem]">
+              Find Your{" "}
+              <span className="bg-linear-to-r from-[#6260FF] via-[#7C6CFF] to-[#4B73FF] bg-clip-text text-transparent">
+                Alumni
+              </span>{" "}
+              Mentor
+            </h1>
 
-            <div className="flex flex-wrap gap-3 text-sm text-white/60">
-              <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2">
-                <span className="h-2 w-2 rounded-full bg-[#7e7bff]" />
-                Product & Design
-              </span>
-              <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2">
-                <span className="h-2 w-2 rounded-full bg-[#ff9c6f]" />
-                AI & Data
-              </span>
-              <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2">
-                <span className="h-2 w-2 rounded-full bg-[#60d394]" />
-                Growth & Marketing
-              </span>
-              <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2">
-                <span className="h-2 w-2 rounded-full bg-[#67c6ff]" />
-                Founders
-              </span>
-            </div>
+            <p className="max-w-2xl text-lg leading-relaxed text-[#55596D] sm:text-xl">
+              Get honest, 1:1 guidance from people who’ve been exactly where you want to go.
+            </p>
           </div>
 
-          <div className="relative flex items-center justify-center">
-            <div className="relative flex w-full max-w-[540px] items-center justify-center">
-              <Image
-                src="/alumunus/hero-one.png"
-                alt="Alumni mentors at IQMento"
-                width={800}
-                height={720}
-                className="relative z-20 h-auto w-full object-cover"
-                priority
-              />
+          <form className="group flex w-full max-w-xl items-center gap-3 rounded-full border border-[#D7DBEF] bg-white/70 px-6 py-4 text-base text-[#717799] shadow-[0_30px_100px_rgba(37,44,86,0.12)] backdrop-blur-sm transition focus-within:border-[#9AA4FF] focus-within:text-[#3D4194]">
+            <Search className="h-5 w-5 text-[#A5A9C6] transition group-focus-within:text-[#6260FF]" />
+            <input
+              type="search"
+              placeholder="Search colleges or mentors…"
+              className="h-6 w-full bg-transparent text-base text-[#3A3D52] placeholder:text-[#9EA1B9] focus-visible:outline-none"
+            />
+          </form>
+        </div>
 
-              <Image
-                src="/alumunus/hero-frame.png"
-                alt=""
-                width={820}
-                height={760}
-                className="absolute inset-0 z-10 h-full w-full object-cover"
-                priority
-              />
-            </div>
+        <div className="relative mt-0 flex items-end justify-center sm:mt-0 sm:-translate-y-24 ">
+          <div className="relative w-full">
+            <Image
+              src="/alumunus/hero-one.png"
+              alt="Students and mentors in a workshop"
+              width={1200}
+              height={1640}
+              priority
+              className="relative z-10 h-auto w-full rounded-[28px] object-cover scale-110"
+            />
+
+            <Image
+              src="/alumunus/hero-frame.png"
+              alt=""
+              width={1200}
+              height={520}
+              priority
+              className="absolute -bottom-10 left-1/2 z-0 h-auto w-[105%] max-w-none -translate-x-1/2 object-cover"
+            />
           </div>
         </div>
-      </Container>
-    </section>
+      </div>
+    </Section>
   );
 }
-
 

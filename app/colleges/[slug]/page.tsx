@@ -60,7 +60,7 @@ export default async function CollegeDetailPage({ params }: PageProps) {
         <AdmissionProcessSection admission={profile.admission} />
         <RecruitersSection recruiters={profile.recruiters} />
         <ReviewsSection reviews={profile.reviews} name={profile.shortName ?? profile.name} />
-        <AlumniShowcase alumni={profile.alumni} shortName={profile.shortName} />
+        <AlumniShowcase alumni={profile.alumni} />
         <FaqsSection faqs={profile.faqs} name={profile.shortName ?? profile.name} />
         <CallToAction />
       </main>

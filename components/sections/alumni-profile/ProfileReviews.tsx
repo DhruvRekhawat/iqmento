@@ -11,11 +11,11 @@ export function ProfileReviewsSection({ profile }: ProfileReviewsProps) {
   const doubled = [...profile.reviews, ...profile.reviews];
 
   return (
-    <section className="relative isolate overflow-hidden bg-[#1b1919] py-24 text-white sm:py-32">
+    <section className="relative isolate overflow-hidden bg-[#1b1919] py-24 text-white sm:py-16">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(148,126,255,0.28)_0%,rgba(27,25,25,0.95)_55%)]" />
       <Container className="relative z-10 flex flex-col gap-14">
         <header className="flex flex-col items-center gap-4 text-center">
-          <h2 className="text-pretty text-[2.8rem] font-medium leading-[0.94] tracking-[-0.045em] sm:text-[3.1rem]">
+          <h2 className="text-pretty text-[2.8rem] font-medium leading-[0.94] tracking-[-0.045em] sm:text-[3.1rem] text-white">
             What mentees say about {profile.name}
           </h2>
           <p className="max-w-2xl text-base leading-relaxed text-white/65 sm:text-lg">

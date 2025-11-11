@@ -17,7 +17,7 @@ export function ProfileSessionsSection({ profile }: ProfileSessionsProps) {
             Signature Sessions
           </span>
           <div className="flex flex-col gap-3">
-            <h2 className="text-pretty text-[2.75rem] font-medium leading-[0.95] tracking-[-0.045em] sm:text-[3rem]">
+            <h2 className="text-pretty text-[2.75rem] font-medium leading-[0.95] tracking-[-0.045em] sm:text-[3rem] text-white">
               Book a session with {profile.name}
             </h2>
             <p className="max-w-2xl text-base leading-relaxed text-white/65 sm:text-lg">

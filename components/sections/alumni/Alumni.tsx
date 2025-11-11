@@ -54,10 +54,7 @@ export function Alumni() {
         </header>
 
         <div className="relative z-10">
-          <div className="pointer-events-none absolute inset-y-8 left-0 w-32 rounded-full bg-linear-to-r from-white via-white/70 to-transparent" />
-          <div className="pointer-events-none absolute inset-y-8 right-0 w-32 rounded-full bg-linear-to-l from-white via-white/70 to-transparent" />
-
-          <div className="marquee-mask overflow-hidden rounded-[32px] bg-white/60 p-6 shadow-[0_40px_120px_rgba(110,70,255,0.16)] backdrop-blur-xl">
+          <div className="marquee-mask overflow-hidden bg-white/60 p-6 shadow-[0_40px_120px_rgba(110,70,255,0.16)] backdrop-blur-xl">
             <div className="marquee-track gap-6">
               {[...mentors, ...mentors].map((mentor, idx) => (
                 <MentorCard key={`${mentor.slug}-${idx}`} {...mentor} />
@@ -89,7 +86,7 @@ function MentorCard({
 }: MentorCardProps) {
   return (
     <article className="relative flex w-[280px] shrink-0 flex-col overflow-hidden rounded-[28px] border border-[rgba(16,19,34,0.06)] bg-white shadow-[0_24px_60px_rgba(26,30,61,0.08)] transition-transform duration-300 hover:-translate-y-2">
-      <div className="relative h-44 overflow-hidden rounded-[24px]">
+      <div className="relative h-44 overflow-hidden rounded-[24px] rounded-b-none">
         <Image
           src={image}
           alt={name}

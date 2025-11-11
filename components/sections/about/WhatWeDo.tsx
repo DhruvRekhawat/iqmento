@@ -35,7 +35,7 @@ export function WhatWeDo() {
             What We Do
           </p>
           <p className="text-lg leading-[1.6] text-[#535353] sm:text-xl">
-            Because we connect you with people who’ve lived it — not just talked
+            Because we connect you with people who&apos;ve lived it — not just talked
             about it.
           </p>
         </header>
@@ -44,7 +44,7 @@ export function WhatWeDo() {
           {WHAT_WE_DO.map((item) => (
             <article
               key={item.number}
-              className="flex h-full flex-col gap-6 rounded-[28px] border border-[#d9d9d9]/60 bg-white/85 p-10 shadow-[0_30px_80px_-48px_rgba(39,16,105,0.35)] backdrop-blur-sm transition-transform duration-300 hover:-translate-y-3 hover:shadow-[0_40px_120px_-48px_rgba(39,16,105,0.45)]"
+              className="flex h-full flex-col gap-6 border border-[#d9d9d9]/60 bg-white/85 p-6 shadow-[0_30px_80px_-48px_rgba(39,16,105,0.35)] backdrop-blur-sm transition-transform duration-300 hover:-translate-y-3 hover:shadow-[0_40px_120px_-48px_rgba(39,16,105,0.45)]"
             >
               <div className="relative flex h-[74px] w-[74px] items-center justify-center overflow-hidden rounded-[22px] border border-black/10 bg-[linear-gradient(221deg,#4f39f6_0%,#2e2190_100%)] text-white shadow-[0_18px_46px_rgba(79,57,246,0.35)]">
                 <span className="text-[2.25rem] font-medium tracking-[-0.02em]">

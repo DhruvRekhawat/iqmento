@@ -1,8 +1,10 @@
 import type { ReactNode } from "react";
 import { BookOpen, ChevronDown, MapPin, Star, Users2, X } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 
 import { Section } from "@/components/shared/section";
+import { collegeProfiles } from "@data/college-profiles";
 
 const FILTERS = [
   { label: "College Type", active: true },
@@ -19,62 +21,23 @@ const ACTION_FILTERS = [
 
 const ACTIVE_FILTERS = ["Sales", "Psychology"];
 
-const COLLEGE_CARDS = [
-  {
-    name: "Indian Institute of Technology, Delhi",
-    location: "New Delhi, India",
-    programs: "Engineering, Robotics, Product Design",
-    mentors: 15,
-    reviews: 42,
-    description:
-      "Engineering meets innovation — get mentored by alumni now leading at Google and Tesla.",
-  },
-  {
-    name: "National Institute of Design, Ahmedabad",
-    location: "Ahmedabad, Gujarat",
-    programs: "Product Design, Animation, Strategic Design",
-    mentors: 8,
-    reviews: 26,
-    description:
-      "Deep dive into studios, juries, and placements with mentors who have lived the NID experience.",
-  },
-  {
-    name: "University of Toronto",
-    location: "Toronto, Canada",
-    programs: "Computer Science, Psychology, Life Sciences",
-    mentors: 12,
-    reviews: 31,
-    description:
-      "Plan your global undergraduate journey with guidance on co-ops, research tracks, and housing.",
-  },
-  {
-    name: "Ashoka University",
-    location: "Sonipat, Haryana",
-    programs: "Economics, Liberal Arts, Interdisciplinary Studies",
-    mentors: 7,
-    reviews: 19,
-    description:
-      "Understand Ashoka’s unique curriculum, YIF pathway, and scholarships directly from seniors.",
-  },
-  {
-    name: "BITS Pilani",
-    location: "Pilani, Rajasthan",
-    programs: "Dual Degrees, Mechanical, Entrepreneurship",
-    mentors: 11,
-    reviews: 28,
-    description:
-      "Decode practice schools, clubs, and the startup ecosystem with BITSians across batches.",
-  },
-  {
-    name: "Georgia Institute of Technology",
-    location: "Atlanta, USA",
-    programs: "Aerospace, Data Science, Industrial Engineering",
-    mentors: 9,
-    reviews: 24,
-    description:
-      "Navigate internationals admits—scholarships, co-ops, and internships with alumni in the US.",
-  },
-];
+const COLLEGE_CARDS = collegeProfiles.slice(0, 6).map((college) => {
+  const programNames = college.courses.map((course) => course.name);
+
+  return {
+    slug: college.slug,
+    name: college.name,
+    location: college.location,
+    programs:
+      programNames.length > 0
+        ? programNames.slice(0, 3).join(", ")
+        : "Programs information coming soon",
+    mentors: college.alumni.length,
+    reviews: college.reviews.length,
+    description: college.hero.tagline,
+    image: college.heroImage || "/college-placeholder.svg",
+  };
+});
 
 export function CollegesExplorer() {
   return (
@@ -172,54 +135,68 @@ function ActiveFilter({ label }: { label: string }) {
 }
 
 interface CollegeCardProps {
+  slug: string;
   name: string;
   location: string;
   programs: string;
   mentors: number;
   reviews: number;
   description: string;
+  image: string;
 }
 
 function CollegeCard({
+  slug,
   name,
   location,
   programs,
   mentors,
   reviews,
   description,
+  image,
 }: CollegeCardProps) {
   return (
-    <article className="flex h-full flex-col gap-6 rounded-3xl border border-[#e5e7ef] bg-[#f5f5f5] p-6 shadow-[0_28px_70px_-48px_rgba(15,23,42,0.45)] transition-transform duration-300 hover:-translate-y-2 hover:shadow-[0_40px_110px_-52px_rgba(15,23,42,0.45)]">
-      <div className="relative h-56 w-full overflow-hidden rounded-2xl bg-[#111]">
-        <Image
-          src="/college-placeholder.svg"
-          alt={name}
-          fill
-          sizes="(max-width: 1024px) 100vw, 360px"
-          className="object-cover opacity-75"
-        />
-      </div>
+    <Link
+      href={`/colleges/${slug}`}
+      className="group flex h-full flex-col rounded-3xl transition-transform duration-300 hover:-translate-y-2"
+    >
+      <article className="flex h-full flex-col gap-6 rounded-3xl border border-[#e5e7ef] bg-[#f5f5f5] p-6 shadow-[0_28px_70px_-48px_rgba(15,23,42,0.45)] transition-shadow duration-300 group-hover:shadow-[0_40px_110px_-52px_rgba(15,23,42,0.45)]">
+        <div className="relative h-56 w-full overflow-hidden rounded-2xl bg-[#111]">
+          <Image
+            src={image}
+            alt={name}
+            fill
+            sizes="(max-width: 1024px) 100vw, 360px"
+            className="object-cover opacity-75"
+          />
+        </div>
 
-      <div className="flex items-center gap-2 text-sm font-medium text-[#9e9e9e]">
-        <StarRow />
-        <span>{reviews} Reviews</span>
-      </div>
+        <div className="flex items-center gap-2 text-sm font-medium text-[#9e9e9e]">
+          <StarRow />
+          <span>{reviews} Reviews</span>
+        </div>
 
-      <h3 className="text-[1.45rem] font-semibold leading-snug tracking-[-0.02em] text-[#11121b]">
-        {name}
-      </h3>
+        <h3 className="text-[1.45rem] font-semibold leading-snug tracking-[-0.02em] text-[#11121b] group-hover:text-[#2f23a8]">
+          {name}
+        </h3>
 
-      <p className="text-sm leading-relaxed text-[#5b5f72]">{description}</p>
+        <p className="text-sm leading-relaxed text-[#5b5f72]">{description}</p>
 
-      <div className="flex flex-col gap-3 text-sm font-medium text-[#575d71]">
-        <InfoRow icon={<MapPin className="h-4 w-4" />} label={location} />
-        <InfoRow icon={<BookOpen className="h-4 w-4" />} label={programs} />
-        <InfoRow
-          icon={<Users2 className="h-4 w-4" />}
-          label={`${mentors} Mentors Available`}
-        />
-      </div>
-    </article>
+        <div className="mt-auto flex flex-col gap-3 text-sm font-medium text-[#575d71]">
+          <InfoRow icon={<MapPin className="h-4 w-4" />} label={location} />
+          <InfoRow icon={<BookOpen className="h-4 w-4" />} label={programs} />
+          <InfoRow
+            icon={<Users2 className="h-4 w-4" />}
+            label={`${mentors} Mentors Available`}
+          />
+        </div>
+
+        <span className="inline-flex items-center gap-2 text-sm font-semibold text-[#4f39f6]">
+          Explore {name}
+          <ChevronDown className="h-4 w-4 -rotate-90 transition-transform group-hover:translate-x-0.5" />
+        </span>
+      </article>
+    </Link>
   );
 }
 

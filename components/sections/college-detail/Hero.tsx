@@ -22,7 +22,7 @@ export function CollegeHero({ profile }: CollegeHeroProps) {
   const { hero, name, location, heroImage } = profile;
 
   return (
-    <section className="relative isolate overflow-hidden bg-[#f1f4ff] py-16 sm:py-24">
+    <section className="relative isolate overflow-hidden bg-[#f1f4ff] py-16 sm:py-6">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(121,131,254,0.18)_0%,rgba(241,244,255,0)_55%),linear-gradient(180deg,rgba(255,255,255,0.8)_0%,rgba(241,244,255,1)_52%,rgba(245,247,255,1)_100%)]" />
       <Container className="relative z-10">
         <div className="grid gap-14 rounded-[24px] border border-black/5 bg-white/80 p-10 shadow-[0_60px_120px_-80px_rgba(22,28,45,0.55)] backdrop-blur-3xl md:grid-cols-[minmax(0,1.05fr)_minmax(320px,0.9fr)] md:p-14">

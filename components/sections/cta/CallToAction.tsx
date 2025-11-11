@@ -7,8 +7,8 @@ export function CallToAction() {
   return (
     <section id="cta" className="pb-20 pt-12 sm:pb-28">
       <Container className="flex justify-center">
-        <div className="relative flex w-full max-w-[1120px] items-center justify-between overflow-hidden rounded-[56px] border border-white/15 bg-[radial-gradient(140%_120%_at_0%_0%,rgba(18,16,44,0.95)_0%,rgba(20,18,56,0.88)_45%,rgba(59,22,124,0.88)_75%,rgba(136,36,180,0.85)_100%)] px-10 py-14 text-white shadow-[0_45px_120px_rgba(18,18,36,0.55)] sm:px-16 sm:py-16">
-          <div className="absolute inset-y-0 right-0 w-[43%] min-w-[320px] max-w-[420px]">
+        <div className="relative flex w-full items-center justify-between overflow-hidden rounded-[16px] border border-white/15 bg-[radial-gradient(140%_120%_at_0%_0%,rgba(18,16,44,0.95)_0%,rgba(20,18,56,0.88)_45%,rgba(59,22,124,0.88)_75%,rgba(136,36,180,0.85)_100%)] px-10 py-14 text-white shadow-[0_45px_120px_rgba(18,18,36,0.55)] sm:px-16 sm:py-16">
+          <div className="absolute inset-y-0 right-0 w-[43%] min-w-[320px] max-w-[420px] sm:block hidden">
             <Image
               src="/features/3.svg"
               alt="Students smiling"
@@ -24,7 +24,7 @@ export function CallToAction() {
                 Your Dream College Journey Starts Here
               </h2>
               <p className="text-base leading-relaxed text-white/65 sm:text-lg">
-                Don’t waste time guessing. Talk to someone who’s lived it.
+                Don&apos;t waste time guessing. Talk to someone who&apos;s lived it.
               </p>
             </div>
 

@@ -9,18 +9,18 @@ export function AboutHero() {
       id="about-hero"
       bleed
       spacing="loose"
-      className="bg-[#050505] py-20 sm:py-24"
+      className="bg-[#050505] py-2 sm:py-4"
     >
-      <div className="mx-auto w-full max-w-[1180px] px-4 sm:px-6 lg:px-10">
-        <div className="relative overflow-hidden rounded-[32px] border border-black/10 bg-white px-6 py-16 shadow-[0_40px_95px_-48px_rgba(0,0,0,0.65)] sm:px-12 md:px-16 lg:px-20">
+      <div className="mx-auto w-full px-4 sm:px-6 lg:px-6">
+        <div className="relative overflow-hidden rounded-[24px] border border-black/10 bg-white py-10 px-6 shadow-[0_40px_95px_-48px_rgba(0,0,0,0.65)] sm:px-6 md:px-16 lg:px-10">
           <HeroSurface />
 
           <div className="relative grid gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(380px,1fr)] lg:items-center">
-            <div className="flex flex-col gap-10">
+            <div className="flex flex-col gap-6">
               <div className="flex flex-col gap-6">
                 <h1 className="text-pretty text-[clamp(2.75rem,3.6vw+1.75rem,4.75rem)] font-medium leading-[0.95] tracking-[-0.04em] text-[#050505]">
                   Because the right{" "}
-                  <span className="bg-gradient-to-r from-[#4f39f6] via-[#6458ff] to-[#7a6cff] bg-clip-text text-transparent">
+                  <span className="bg-linear-to-r from-[#4f39f6] via-[#6458ff] to-[#7a6cff] bg-clip-text text-transparent">
                     guidance
                   </span>{" "}
                   can change everything.
@@ -74,7 +74,7 @@ function HeroSurface() {
   return (
     <>
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_30%_0%,rgba(104,86,255,0.12)_0%,transparent_55%)]" />
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(214,215,255,0.35)_1px,transparent_1px),linear-gradient(180deg,rgba(214,215,255,0.35)_1px,transparent_1px)] bg-[size:98px_98px]" />
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(214,215,255,0.35)_1px,transparent_1px),linear-gradient(180deg,rgba(214,215,255,0.35)_1px,transparent_1px)] bg-size-[98px_98px]" />
       <div className="pointer-events-none absolute inset-x-6 inset-y-6 rounded-[28px] border border-black/6" />
     </>
   );

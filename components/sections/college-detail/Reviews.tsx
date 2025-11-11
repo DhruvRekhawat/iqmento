@@ -12,14 +12,14 @@ export function ReviewsSection({ reviews, name }: ReviewsSectionProps) {
   const doubledReviews = [...reviews, ...reviews];
 
   return (
-    <section className="relative isolate overflow-hidden bg-[#201e1e] py-24 text-white sm:py-32">
+    <section className="relative isolate overflow-hidden bg-[#201e1e] py-24 text-white sm:py-16">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(151,71,255,0.18)_0%,rgba(32,30,30,0.95)_55%)]" />
       <Container className="relative z-10 flex flex-col gap-14">
         <header className="flex flex-col items-center gap-5 text-center">
-          <h2 className="text-pretty text-[2.75rem] font-medium leading-[0.92] tracking-[-0.04em] sm:text-[3.25rem]">
+          <h2 className="text-pretty text-[2.75rem] font-medium leading-[0.92] tracking-[-0.04em] sm:text-[3.25rem] text-white">
             Student Reviews
           </h2>
-          <p className="max-w-2xl text-base leading-relaxed text-white/70 sm:text-lg">
+          <p className="max-w-2xl text-base leading-relaxed text-white/80 sm:text-lg">
             Hear how {name} aspirants use mentor insights, review breakdowns, and campus walkthroughs to prepare smarter.
           </p>
         </header>
