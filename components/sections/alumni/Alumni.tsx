@@ -3,7 +3,8 @@ import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
 import { Section } from "@/components/shared/section";
-import { alumniProfiles } from "@/data/alumni-profiles";
+import { getAlumni } from "@/lib/strapi";
+import { mapStrapiAlumniToMentorCard } from "@/lib/strapi-mappers";
 
 type MentorCardContent = {
   slug: string;
@@ -14,23 +15,37 @@ type MentorCardContent = {
   image: string;
 };
 
-const mentors: MentorCardContent[] = alumniProfiles.map((profile) => {
-  const [role, company] = profile.headline.split("·").map((part) => part.trim());
-  const experience = profile.stats.find((stat) =>
-    stat.label.toLowerCase().includes("experience")
-  )?.value;
+export async function Alumni() {
+  let mentors: MentorCardContent[] = [];
 
-  return {
-    slug: profile.slug,
-    name: profile.name,
-    role: role ?? profile.headline,
-    company,
-    experience,
-    image: profile.image,
-  };
-});
+  try {
+    const alumniResponse = await getAlumni({
+      populate: ["profile"],
+      filters: {
+        publishedAt: { $notNull: true },
+      },
+      pagination: {
+        pageSize: 20,
+      },
+      sort: ["isFeatured:desc", "createdAt:desc"],
+    });
 
-export function Alumni() {
+    if (alumniResponse?.data && Array.isArray(alumniResponse.data)) {
+      mentors = alumniResponse.data.map(mapStrapiAlumniToMentorCard);
+    } else {
+      console.warn("Alumni API returned unexpected format:", alumniResponse);
+    }
+  } catch (error) {
+    console.error("Error fetching alumni:", error);
+    // Log more details in development
+    if (process.env.NODE_ENV === 'development') {
+      console.error("Error details:", {
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+      });
+    }
+    // Fallback to empty array
+  }
   return (
     <Section
       id="alumni"
@@ -54,13 +69,24 @@ export function Alumni() {
         </header>
 
         <div className="relative z-10">
-          <div className="marquee-mask overflow-hidden bg-white/60 p-6 shadow-[0_40px_120px_rgba(110,70,255,0.16)] backdrop-blur-xl">
-            <div className="marquee-track gap-6">
-              {[...mentors, ...mentors].map((mentor, idx) => (
-                <MentorCard key={`${mentor.slug}-${idx}`} {...mentor} />
-              ))}
+          {mentors.length > 0 ? (
+            <div className="marquee-mask overflow-hidden bg-white/60 p-6 shadow-[0_40px_120px_rgba(110,70,255,0.16)] backdrop-blur-xl">
+              <div className="marquee-track gap-6">
+                {[...mentors, ...mentors].map((mentor, idx) => (
+                  <MentorCard key={`${mentor.slug}-${idx}`} {...mentor} />
+                ))}
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="rounded-lg bg-white/60 p-8 text-center text-black/60">
+              <p className="text-sm">No alumni data available. Please check your API configuration.</p>
+              {process.env.NODE_ENV === 'development' && (
+                <p className="mt-2 text-xs">
+                  Make sure BACKEND_BASE_URL is set to http://localhost:1337
+                </p>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </Section>

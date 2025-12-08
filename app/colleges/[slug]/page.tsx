@@ -13,10 +13,8 @@ import {
 } from "@/components/sections/college-detail";
 import { CallToAction } from "@/components/sections/cta";
 import { Footer } from "@/components/sections/footer";
-import {
-  collegeProfiles,
-  getCollegeProfile,
-} from "@/data/college-profiles";
+import { getCollegeBySlug, getColleges, getAlumni } from "@/lib/strapi";
+import { mapStrapiCollegeToCollegeProfile, mapStrapiAlumniToMentorCard } from "@/lib/strapi-mappers";
 
 type PageParams = {
   slug: string;
@@ -26,29 +24,83 @@ type PageProps = {
   params: Promise<PageParams>;
 };
 
-export function generateStaticParams() {
-  return collegeProfiles.map((college) => ({
-    slug: college.slug,
-  }));
+export async function generateStaticParams() {
+  try {
+    const collegesResponse = await getColleges({
+      populate: ["heroImage"],
+      filters: {
+        publishedAt: { $notNull: true },
+      },
+      pagination: {
+        pageSize: 100,
+      },
+    });
+
+    return collegesResponse.data
+      .map((college) => {
+        const slug = college.slug;
+        return slug ? { slug } : null;
+      })
+      .filter((item): item is { slug: string } => item !== null);
+  } catch (error) {
+    console.error("Error generating static params for colleges:", error);
+    return [];
+  }
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const profile = getCollegeProfile(slug);
+  const collegeResponse = await getCollegeBySlug(slug, {
+    populate: ["heroImage"],
+  });
 
-  if (!profile) {
+  if (!collegeResponse) {
     return {};
   }
 
+  const profile = mapStrapiCollegeToCollegeProfile(collegeResponse.data);
   return profile.metadata;
 }
 
 export default async function CollegeDetailPage({ params }: PageProps) {
   const { slug } = await params;
-  const profile = getCollegeProfile(slug);
+  const collegeResponse = await getCollegeBySlug(slug, {
+    populate: ["heroImage", "alumni"],
+  });
 
-  if (!profile) {
+  if (!collegeResponse) {
     notFound();
+  }
+
+  const profile = mapStrapiCollegeToCollegeProfile(collegeResponse.data);
+
+  // Fetch alumni for the showcase if not already populated
+  let alumniForShowcase = profile.alumni;
+  if (alumniForShowcase.length === 0) {
+    try {
+      const alumniResponse = await getAlumni({
+        populate: ["profile"],
+        filters: {
+          publishedAt: { $notNull: true },
+        },
+        pagination: {
+          pageSize: 10,
+        },
+        sort: ["isFeatured:desc"],
+      });
+
+      alumniForShowcase = alumniResponse.data.slice(0, 5).map((alum) => {
+        const mapped = mapStrapiAlumniToMentorCard(alum);
+        return {
+          name: mapped.name,
+          role: mapped.role,
+          company: mapped.company || "",
+          image: mapped.image,
+        };
+      });
+    } catch (error) {
+      console.error("Error fetching alumni for showcase:", error);
+    }
   }
 
   return (
@@ -60,7 +112,7 @@ export default async function CollegeDetailPage({ params }: PageProps) {
         <AdmissionProcessSection admission={profile.admission} />
         <RecruitersSection recruiters={profile.recruiters} />
         <ReviewsSection reviews={profile.reviews} name={profile.shortName ?? profile.name} />
-        <AlumniShowcase alumni={profile.alumni} />
+        <AlumniShowcase alumni={alumniForShowcase} />
         <FaqsSection faqs={profile.faqs} name={profile.shortName ?? profile.name} />
         <CallToAction />
       </main>

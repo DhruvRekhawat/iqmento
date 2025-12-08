@@ -1,9 +1,40 @@
 import Image from "next/image";
-import { Search } from "lucide-react";
 
 import { Section } from "@/components/shared/section";
+import { SearchBar } from "@/components/shared/search-bar";
+import type { StrapiAlumni } from "@/types/alumni";
+import type { StrapiCollege } from "@/types/college";
+import { mapStrapiAlumniToAlumniProfile, mapStrapiCollegeToCollegeProfile } from "@/lib/strapi-mappers";
 
-export function AlumniDirectoryHero() {
+interface AlumniDirectoryHeroProps {
+  alumni?: StrapiAlumni[];
+  colleges?: StrapiCollege[];
+}
+
+export function AlumniDirectoryHero({ alumni = [], colleges = [] }: AlumniDirectoryHeroProps) {
+  // Transform alumni data for search
+  const alumniForSearch = alumni.map((alum) => {
+    const profile = mapStrapiAlumniToAlumniProfile(alum);
+    return {
+      slug: profile.slug || "",
+      name: profile.name || "",
+      location: profile.location || "",
+      headline: profile.headline || "",
+      image: profile.image || "",
+    };
+  });
+
+  // Transform colleges data for search
+  const collegesForSearch = colleges.map((college) => {
+    const profile = mapStrapiCollegeToCollegeProfile(college);
+    return {
+      slug: profile.slug || "",
+      name: profile.name || "",
+      location: profile.location || "",
+      heroImage: profile.heroImage || null,
+    };
+  });
+
   return (
     <Section id="alumni-directory-hero" variant="hero" spacing="loose" bleed className="h-fit">
       <div className="relative overflow-hidden rounded-[16px] border border-[#b0b0b0] bg-white px-6 pb-0 pt-16 sm:px-10 sm:pt-20">
@@ -20,18 +51,18 @@ export function AlumniDirectoryHero() {
             </h1>
 
             <p className="max-w-2xl text-lg leading-relaxed text-[#55596D] sm:text-xl">
-              Get honest, 1:1 guidance from people who’ve been exactly where you want to go.
+              Get honest, 1:1 guidance from people who've been exactly where you want to go.
             </p>
           </div>
 
-          <form className="group flex w-full max-w-xl items-center gap-3 rounded-full border border-[#D7DBEF] bg-white/70 px-6 py-4 text-base text-[#717799] shadow-[0_30px_100px_rgba(37,44,86,0.12)] backdrop-blur-sm transition focus-within:border-[#9AA4FF] focus-within:text-[#3D4194]">
-            <Search className="h-5 w-5 text-[#A5A9C6] transition group-focus-within:text-[#6260FF]" />
-            <input
-              type="search"
+          <div className="relative z-50 w-full max-w-xl">
+            <SearchBar
               placeholder="Search colleges or mentors…"
-              className="h-6 w-full bg-transparent text-base text-[#3A3D52] placeholder:text-[#9EA1B9] focus-visible:outline-none"
+              colleges={collegesForSearch}
+              alumni={alumniForSearch}
+              className="group rounded-full border border-[#D7DBEF] bg-white/70 px-6 py-4 text-base text-[#717799] shadow-[0_30px_100px_rgba(37,44,86,0.12)] backdrop-blur-sm transition focus-within:border-[#9AA4FF] focus-within:text-[#3D4194]"
             />
-          </form>
+          </div>
         </div>
 
         <div className="relative mt-0 flex items-end justify-center sm:mt-0 sm:-translate-y-24 ">

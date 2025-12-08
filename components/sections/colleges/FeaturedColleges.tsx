@@ -3,6 +3,8 @@ import { MapPin, Users2 } from "lucide-react";
 import Image from "next/image";
 
 import { Section } from "@/components/shared/section";
+import type { StrapiCollege } from "@/types/college";
+import { mapStrapiCollegeToCollegeProfile } from "@/lib/strapi-mappers";
 
 interface College {
   name: string;
@@ -13,67 +15,26 @@ interface College {
   image: string;
 }
 
-const MOST_BOOKED: College[] = [
-  {
-    name: "Indian Institute of Technology, Delhi",
-    location: "New Delhi, India",
-    description:
-      "Engineering meets innovation — get mentored by alumni now leading at Google and Tesla.",
-    mentors: 15,
-    reviews: 42,
-    image: "/college-placeholder.svg",
-  },
-  {
-    name: "Indian Institute of Management, Bangalore",
-    location: "Bengaluru, India",
-    description:
-      "Decode essays, interviews, and campus life with mentors who cracked the IIM journey.",
-    mentors: 18,
-    reviews: 38,
-    image: "/college-placeholder.svg",
-  },
-  {
-    name: "Georgia Institute of Technology",
-    location: "Atlanta, USA",
-    description:
-      "Navigate international admissions, co-ops, and STEM pathways with alumni across the US.",
-    mentors: 12,
-    reviews: 27,
-    image: "/college-placeholder.svg",
-  },
-];
+interface FeaturedCollegesProps {
+  colleges: StrapiCollege[];
+}
 
-const RISING: College[] = [
-  {
-    name: "BITS Pilani",
-    location: "Pilani, India",
-    description:
-      "Understand dual degrees, practice schools, and the startup culture from BITSians themselves.",
-    mentors: 11,
-    reviews: 26,
-    image: "/college-placeholder.svg",
-  },
-  {
-    name: "University of Toronto",
-    location: "Toronto, Canada",
-    description:
-      "Plan your global undergraduate journey with clarity on research tracks, housing, and co-ops.",
-    mentors: 9,
-    reviews: 22,
-    image: "/college-placeholder.svg",
-  },
-  {
-    name: "Ashoka University",
-    location: "Sonipat, India",
-    description:
-      "Explore interdisciplinary majors, the YIF pathway, and scholarships with current students.",
-    mentors: 7,
-    reviews: 18,
-    image: "/college-placeholder.svg",
-  },
-];
+export function FeaturedColleges({ colleges }: FeaturedCollegesProps) {
+  const mappedColleges = colleges.map((college) => {
+    const profile = mapStrapiCollegeToCollegeProfile(college);
+    return {
+      name: profile.name,
+      description: profile.hero.tagline || profile.hero.description || "",
+      mentors: profile.alumni.length,
+      reviews: profile.reviews.length,
+      location: profile.location,
+      image: profile.heroImage || "/college-placeholder.svg",
+    };
+  });
 
-export function FeaturedColleges() {
+  // Split into most booked (first 3) and rising (next 3)
+  const MOST_BOOKED = mappedColleges.slice(0, 3);
+  const RISING = mappedColleges.slice(3, 6);
   return (
     <Section
       id="featured-colleges"

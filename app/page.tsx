@@ -9,8 +9,19 @@ import { Testimonials } from "@/components/sections/testimonials";
 import { FAQ } from "@/components/sections/faq";
 import { CallToAction } from "@/components/sections/cta";
 import { Footer } from "@/components/sections/footer";
+import { getColleges } from "@/lib/strapi";
 
-export default function Home() {
+export default async function Home() {
+  const collegesResponse = await getColleges({
+    populate: ["heroImage"],
+    filters: {
+      publishedAt: { $notNull: true },
+    },
+    pagination: {
+      pageSize: 6,
+    },
+  });
+
   return (
     <>
       <Navigation />
@@ -21,7 +32,7 @@ export default function Home() {
         <Audience />
         <Alumni />
         <AlumniHighlights />
-        <FeaturedColleges />
+        <FeaturedColleges colleges={collegesResponse.data} />
         <Testimonials />
         <FAQ />
         <CallToAction />

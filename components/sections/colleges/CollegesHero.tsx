@@ -2,26 +2,53 @@ import type { SVGProps } from "react";
 import Image from "next/image";
 
 import { Section } from "@/components/shared/section";
+import { SearchBar } from "@/components/shared/search-bar";
+import type { StrapiCollege } from "@/types/college";
+import { mapStrapiCollegeToCollegeProfile } from "@/lib/strapi-mappers";
 
-export function CollegesHero() {
+interface CollegesHeroProps {
+  colleges?: StrapiCollege[];
+  alumni?: Array<{
+    slug: string;
+    name: string;
+    location?: string;
+    headline?: string;
+    image?: string;
+  }>;
+}
+
+export function CollegesHero({ colleges = [], alumni = [] }: CollegesHeroProps) {
+  // Transform colleges data for search
+  const collegesForSearch = colleges.map((college) => {
+    const profile = mapStrapiCollegeToCollegeProfile(college);
+    return {
+      slug: profile.slug,
+      name: profile.name,
+      location: profile.location,
+      heroImage: profile.heroImage,
+    };
+  });
+
   return (
     <Section
       id="colleges-hero"
       bleed
       spacing="loose"
-      className="bg-black py-4 text-white sm:py-4"
+      className="bg-black py-4 text-white sm:py-4 relative z-10"
     >
       <div className="flex justify-center">
-        <div className="relative w-full max-w-[1180px] overflow-hidden rounded-[38px] border border-white/20 bg-[#0f1010] ">
-          <Image
-            src="/colleges/hero.png"
-            alt="Modern college buildings with clear sky"
-            width={1600}
-            height={900}
-            priority
-            className="absolute inset-0 h-full w-full object-cover"
-          />
-          <div className="absolute inset-0 bg-linear-to-br from-transparent via-transparent to-black/10" />
+        <div className="relative w-full max-w-[1180px] rounded-[38px] border border-white/20 bg-[#0f1010]">
+          <div className="absolute inset-0 overflow-hidden rounded-[38px]">
+            <Image
+              src="/colleges/hero.png"
+              alt="Modern college buildings with clear sky"
+              width={1600}
+              height={900}
+              priority
+              className="h-full w-full object-cover"
+            />
+            <div className="absolute inset-0 bg-linear-to-br from-transparent via-transparent to-black/10" />
+          </div>
           <div className="relative z-10 flex flex-col gap-10 px-6 py-16 text-center sm:px-12 md:px-16 lg:px-24 lg:pb-48">
             <div className="flex flex-col items-center gap-6 text-center">
               <h1 className="text-pretty text-[clamp(3rem,4vw+2rem,6rem)] leading-[0.92] tracking-[-0.06em] text-white">
@@ -38,17 +65,13 @@ export function CollegesHero() {
               </p>
             </div>
 
-            <form
-              className="mx-auto flex w-full max-w-[520px] items-center gap-3 rounded-full bg-white/95 px-6 py-4 text-left shadow-[0_28px_70px_rgba(0,0,0,0.35)] backdrop-blur-xl"
-              role="search"
-            >
-              <SearchIcon className="h-5 w-5 text-[#9ca3af]" />
-              <input
-                type="search"
+            <div className="mx-auto w-full max-w-[520px] relative z-20">
+              <SearchBar
                 placeholder="Search by College, City, or Course"
-                className="flex-1 bg-transparent text-sm text-[#404957] placeholder:text-[#9ca3af] focus:outline-none"
+                colleges={collegesForSearch}
+                alumni={alumni}
               />
-            </form>
+            </div>
           </div>
         </div>
       </div>
@@ -75,29 +98,4 @@ function ArrowIcon(props: SVGProps<SVGSVGElement>) {
   );
 }
 
-function SearchIcon(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      viewBox="0 0 20 20"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      {...props}
-    >
-      <path
-        d="M9.5 17a7.5 7.5 0 1 0 0-15 7.5 7.5 0 0 0 0 15Z"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="m16.5 16.5-3.262-3.262"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
 

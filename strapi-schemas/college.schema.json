@@ -1,0 +1,100 @@
+{
+  "kind": "collectionType",
+  "collectionName": "colleges",
+  "info": {
+    "singularName": "college",
+    "pluralName": "colleges",
+    "displayName": "College",
+    "description": "College profiles and information"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "slug": {
+      "type": "uid",
+      "targetField": "name",
+      "required": true,
+      "unique": true
+    },
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "shortName": {
+      "type": "string"
+    },
+    "location": {
+      "type": "string",
+      "required": true
+    },
+    "heroImage": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": ["images"]
+    },
+    "hero": {
+      "type": "json"
+    },
+    "about": {
+      "type": "json"
+    },
+    "courses": {
+      "type": "json"
+    },
+    "admission": {
+      "type": "json"
+    },
+    "recruiters": {
+      "type": "json"
+    },
+    "reviews": {
+      "type": "json"
+    },
+    "faqs": {
+      "type": "json"
+    },
+    "metadata": {
+      "type": "json"
+    },
+    "alumni": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::alumni.alumni",
+      "mappedBy": "college"
+    },
+    "collegeType": {
+      "type": "enumeration",
+      "enum": [
+        "IIT",
+        "NIT",
+        "IIM",
+        "NID",
+        "Medical",
+        "Law",
+        "Arts",
+        "Commerce",
+        "Engineering",
+        "Design",
+        "Business",
+        "Other"
+      ]
+    },
+    "collegeTier": {
+      "type": "enumeration",
+      "enum": [
+        "Tier 1",
+        "Tier 2",
+        "Tier 3"
+      ]
+    },
+    "rating": {
+      "type": "decimal",
+      "min": 0,
+      "max": 5
+    }
+  }
+}
+

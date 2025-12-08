@@ -5,8 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Container } from "@/components/shared/container";
 
 const NAV_ITEMS: { label: string; href: string }[] = [
-  { label: "How It Works", href: "#roadmap" },
-  { label: "Testimonials", href: "#testimonials" },
+  { label: "Colleges", href: "/colleges" },
+  { label: "Alumini", href: "/alumini" },
+  { label: "About Us", href: "/about-us" },
   { label: "FAQ", href: "#faq" },
   { label: "Become a Mentor", href: "#cta" },
 ];

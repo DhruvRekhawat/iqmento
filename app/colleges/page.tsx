@@ -9,6 +9,7 @@ import {
   CollegesHero,
   FeaturedColleges,
 } from "@/components/sections/colleges";
+import { getColleges, getAlumni } from "@/lib/strapi";
 
 export const metadata: Metadata = {
   title: "All Colleges — Explore Mentors by Campus | IQMento",
@@ -29,14 +30,35 @@ export const metadata: Metadata = {
   },
 };
 
-export default function AllCollegesPage() {
+export default async function AllCollegesPage() {
+  const collegesResponse = await getColleges({
+    populate: ["heroImage"],
+    filters: {
+      publishedAt: { $notNull: true },
+    },
+    pagination: {
+      pageSize: 100,
+    },
+  });
+
+  // Get alumni data for search
+  const alumniResponse = await getAlumni({
+    populate: ["profile"],
+    filters: {
+      publishedAt: { $notNull: true },
+    },
+    pagination: {
+      pageSize: 50,
+    },
+  });
+
   return (
     <>
       <Navigation />
       <main className="bg-surface">
-        <CollegesHero />
-        <CollegesExplorer />
-        <FeaturedColleges />
+        <CollegesHero colleges={collegesResponse.data} alumni={alumniResponse.data} />
+        <CollegesExplorer colleges={collegesResponse.data} />
+        <FeaturedColleges colleges={collegesResponse.data} />
         <Testimonials />
         <CallToAction />
       </main>
