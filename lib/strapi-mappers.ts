@@ -1,7 +1,8 @@
+import type { Metadata } from "next";
 import type { StrapiAlumni } from "@/types/alumni";
 import type { StrapiCollege } from "@/types/college";
 import type { AlumniProfile } from "@/data/alumni-profiles";
-import type { CollegeProfile } from "@/data/college-profiles";
+import type { CollegeProfile, CollegeHeroContent, PlacementHighlight } from "@/data/college-profiles";
 
 /**
  * Get media URL from Strapi media object
@@ -175,23 +176,24 @@ export function mapStrapiCollegeToCollegeProfile(
   const slug = strapiCollege.slug || "unknown-college";
 
   // Transform hero (title/subtitle -> tagline)
-  let hero = strapiCollege.hero;
-  if (hero && (hero.title || hero.subtitle)) {
-    hero = {
-      tagline: hero.tagline || hero.title || hero.subtitle || "Explore this college",
-      description: hero.description || "",
-      badges: hero.badges || [],
-      primaryAction: hero.primaryAction || {
-        label: "Learn More",
-        href: "#",
-      },
-      secondaryAction: hero.secondaryAction || {
-        label: "Download Brochure",
-        href: "#",
-      },
-    };
-  } else {
-    hero = hero || {
+  const hero: CollegeHeroContent = (() => {
+    const strapiHero = strapiCollege.hero;
+    if (strapiHero) {
+      return {
+        tagline: strapiHero.tagline || strapiHero.title || strapiHero.subtitle || "Explore this college",
+        description: strapiHero.description || "",
+        badges: strapiHero.badges || [],
+        primaryAction: strapiHero.primaryAction || {
+          label: "Learn More",
+          href: "#",
+        },
+        secondaryAction: strapiHero.secondaryAction || {
+          label: "Download Brochure",
+          href: "#",
+        },
+      };
+    }
+    return {
       tagline: "Explore this college",
       description: "Learn more about this institution",
       badges: [],
@@ -204,7 +206,7 @@ export function mapStrapiCollegeToCollegeProfile(
         href: "#",
       },
     };
-  }
+  })();
 
   // Transform about (object -> string[])
   let about: string[] = [];
@@ -232,48 +234,66 @@ export function mapStrapiCollegeToCollegeProfile(
   }));
 
   // Transform admission (process/exam/fees -> title/subtitle/steps)
-  let admission = strapiCollege.admission;
-  if (admission && (admission.process || admission.exam)) {
-    const steps: Array<{ title: string; description: string; highlight?: boolean }> = [];
-    if (admission.exam) {
-      steps.push({ title: "Entrance Exam", description: admission.exam, highlight: true });
+  const admission: { title: string; subtitle: string; steps: Array<{ title: string; description: string; highlight?: boolean }> } = (() => {
+    const strapiAdmission = strapiCollege.admission;
+    if (strapiAdmission && (strapiAdmission.process || strapiAdmission.exam)) {
+      const steps: Array<{ title: string; description: string; highlight?: boolean }> = [];
+      if (strapiAdmission.exam) {
+        steps.push({ title: "Entrance Exam", description: strapiAdmission.exam, highlight: true });
+      }
+      if (strapiAdmission.process) {
+        steps.push({ title: "Application Process", description: strapiAdmission.process });
+      }
+      if (strapiAdmission.applicationDeadline) {
+        steps.push({ title: "Application Deadline", description: strapiAdmission.applicationDeadline });
+      }
+      return {
+        title: strapiAdmission.title || "Admission Process",
+        subtitle: strapiAdmission.subtitle || "Learn about the admission requirements",
+        steps: steps.length > 0 ? steps : (strapiAdmission.steps || []),
+      };
     }
-    if (admission.process) {
-      steps.push({ title: "Application Process", description: admission.process });
+    if (strapiAdmission) {
+      return {
+        title: strapiAdmission.title || "Admission Process",
+        subtitle: strapiAdmission.subtitle || "Learn about the admission requirements",
+        steps: strapiAdmission.steps || [],
+      };
     }
-    if (admission.applicationDeadline) {
-      steps.push({ title: "Application Deadline", description: admission.applicationDeadline });
-    }
-    admission = {
-      title: admission.title || "Admission Process",
-      subtitle: admission.subtitle || "Learn about the admission requirements",
-      steps: steps.length > 0 ? steps : admission.steps || [],
-    };
-  } else {
-    admission = admission || {
+    return {
       title: "Admission Process",
       subtitle: "Learn about the admission requirements",
       steps: [],
     };
-  }
+  })();
 
   // Transform recruiters (string[] -> object)
-  let recruiters = strapiCollege.recruiters;
-  if (Array.isArray(recruiters)) {
-    recruiters = {
-      title: "Top Recruiters",
-      logos: recruiters,
-      cutoff: [],
-      placements: [],
-    };
-  } else if (!recruiters) {
-    recruiters = {
+  const recruiters: CollegeProfile["recruiters"] = (() => {
+    const strapiRecruiters = strapiCollege.recruiters;
+    if (Array.isArray(strapiRecruiters)) {
+      return {
+        title: "Top Recruiters",
+        logos: strapiRecruiters,
+        cutoff: [],
+        placements: [],
+      };
+    }
+    if (strapiRecruiters && typeof strapiRecruiters === 'object') {
+      const recruitersObj = strapiRecruiters;
+      return {
+        title: recruitersObj.title || "Top Recruiters",
+        logos: recruitersObj.logos || [],
+        cutoff: recruitersObj.cutoff || [],
+        placements: (recruitersObj.placements || []) as PlacementHighlight[],
+      };
+    }
+    return {
       title: "Top Recruiters",
       logos: [],
       cutoff: [],
       placements: [],
     };
-  }
+  })();
 
   // Transform reviews (comment/author -> quote/name/role)
   const reviews = (strapiCollege.reviews || []).map(r => ({
@@ -324,19 +344,44 @@ export function mapStrapiCollegeToCollegeProfile(
       return [];
     })(),
     faqs: strapiCollege.faqs || [],
-    metadata: strapiCollege.metadata || {
-      title: `${strapiCollege.name} | IQMento`,
-      description: `Learn about ${strapiCollege.name}`,
-      openGraph: {
-        title: `${strapiCollege.name} | IQMento`,
-        description: `Learn about ${strapiCollege.name}`,
-      },
-      twitter: {
-        card: "summary_large_image",
-        title: `${strapiCollege.name} | IQMento`,
-        description: `Learn about ${strapiCollege.name}`,
-      },
-    },
+    metadata: ((): Metadata => {
+      const strapiMetadata = strapiCollege.metadata;
+      const collegeName = strapiCollege.name || "College";
+      
+      if (strapiMetadata && (strapiMetadata.title != null || strapiMetadata.description != null || strapiMetadata.openGraph != null || strapiMetadata.twitter != null)) {
+        const metadata: Metadata = {};
+        
+        if (strapiMetadata.title != null) metadata.title = strapiMetadata.title;
+        if (strapiMetadata.description != null) metadata.description = strapiMetadata.description;
+        
+        if (strapiMetadata.openGraph != null && (strapiMetadata.openGraph.title != null || strapiMetadata.openGraph.description != null)) {
+          metadata.openGraph = {};
+          if (strapiMetadata.openGraph.title != null) metadata.openGraph.title = strapiMetadata.openGraph.title;
+          if (strapiMetadata.openGraph.description != null) metadata.openGraph.description = strapiMetadata.openGraph.description;
+        }
+        
+        if (strapiMetadata.twitter != null && (strapiMetadata.twitter.title != null || strapiMetadata.twitter.description != null)) {
+          metadata.twitter = {};
+          if (strapiMetadata.twitter.title != null) metadata.twitter.title = strapiMetadata.twitter.title;
+          if (strapiMetadata.twitter.description != null) metadata.twitter.description = strapiMetadata.twitter.description;
+        }
+        
+        return metadata;
+      }
+      
+      return {
+        title: `${collegeName} | IQMento`,
+        description: `Learn about ${collegeName}`,
+        openGraph: {
+          title: `${collegeName} | IQMento`,
+          description: `Learn about ${collegeName}`,
+        },
+        twitter: {
+          title: `${collegeName} | IQMento`,
+          description: `Learn about ${collegeName}`,
+        },
+      };
+    })(),
   };
 }
 

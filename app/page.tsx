@@ -6,10 +6,12 @@ import { Audience } from "@/components/sections/audience";
 import { Alumni, AlumniHighlights } from "@/components/sections/alumni";
 import { FeaturedColleges } from "@/components/sections/colleges";
 import { Testimonials } from "@/components/sections/testimonials";
+import type { Testimonial } from "@/components/sections/testimonials/Testimonials";
 import { FAQ } from "@/components/sections/faq";
 import { CallToAction } from "@/components/sections/cta";
 import { Footer } from "@/components/sections/footer";
-import { getColleges } from "@/lib/strapi";
+import { getColleges, getAlumni } from "@/lib/strapi";
+import { extractTestimonialsFromAlumni } from "@/lib/testimonials-utils";
 
 export default async function Home() {
   const collegesResponse = await getColleges({
@@ -22,6 +24,24 @@ export default async function Home() {
     },
   });
 
+  // Fetch alumni with reviews for testimonials
+  let testimonials: Testimonial[];
+  try {
+    const alumniResponse = await getAlumni({
+      populate: ["reviews"],
+      filters: {
+        publishedAt: { $notNull: true },
+      },
+      pagination: {
+        pageSize: 100,
+      },
+    });
+    testimonials = extractTestimonialsFromAlumni(alumniResponse.data);
+  } catch (error) {
+    console.error("Error fetching testimonials:", error);
+    testimonials = [];
+  }
+
   return (
     <>
       <Navigation />
@@ -33,7 +53,7 @@ export default async function Home() {
         <Alumni />
         <AlumniHighlights />
         <FeaturedColleges colleges={collegesResponse.data} />
-        <Testimonials />
+        <Testimonials testimonials={testimonials} />
         <FAQ />
         <CallToAction />
       </main>

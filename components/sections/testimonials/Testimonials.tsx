@@ -1,15 +1,16 @@
 import { Container } from "@/components/shared/container";
 
-const TESTIMONIALS = [
+// Fallback static testimonials if no reviews available
+const FALLBACK_TESTIMONIALS = [
   {
     quote:
-      "Talking to an NID alumnus helped me rebuild my portfolio from scratch—and land the admit I’d always wanted.",
+      "Talking to an NID alumnus helped me rebuild my portfolio from scratch—and land the admit I'd always wanted.",
     name: "Aarushi, Delhi",
     context: "Admitted to NID B.Des 2024",
   },
   {
     quote:
-      "My mentor broke down the IIT Kanpur experience from hostels to research labs. It felt like I’d already been there.",
+      "My mentor broke down the IIT Kanpur experience from hostels to research labs. It felt like I'd already been there.",
     name: "Pranav, Bengaluru",
     context: "AIR 142 · IIT Kanpur (CSE)",
   },
@@ -33,7 +34,22 @@ const TESTIMONIALS = [
   },
 ];
 
-export function Testimonials() {
+export interface Testimonial {
+  quote: string;
+  name: string;
+  context: string;
+}
+
+interface TestimonialsProps {
+  testimonials?: Testimonial[];
+}
+
+export function Testimonials({ testimonials }: TestimonialsProps) {
+  // Use provided testimonials or fallback to static
+  const displayTestimonials = testimonials && testimonials.length > 0 
+    ? testimonials 
+    : FALLBACK_TESTIMONIALS;
+
   return (
     <section
       id="testimonials"
@@ -53,7 +69,7 @@ export function Testimonials() {
 
           <div className="marquee-mask overflow-hidden">
             <div className="marquee-track gap-8">
-              {[...TESTIMONIALS, ...TESTIMONIALS].map((testimonial, idx) => (
+              {[...displayTestimonials, ...displayTestimonials].map((testimonial, idx) => (
                 <TestimonialCard key={`${testimonial.name}-${idx}`} {...testimonial} />
               ))}
             </div>

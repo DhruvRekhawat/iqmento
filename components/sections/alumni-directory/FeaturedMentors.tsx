@@ -29,7 +29,7 @@ export function FeaturedMentorsSection({ alumni }: FeaturedMentorsSectionProps) 
             Meet Our Featured Mentors
           </h2>
           <p className="max-w-2xl text-base leading-relaxed text-[#55586c] sm:text-lg">
-            Each of these mentors once faced the same questions, doubts, and dreams. Now they're ready
+            Each of these mentors once faced the same questions, doubts, and dreams. Now they&apos;re ready
             to guide you through them.
           </p>
         </header>

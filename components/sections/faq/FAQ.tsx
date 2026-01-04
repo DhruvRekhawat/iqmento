@@ -1,7 +1,13 @@
 
 import { Container } from "@/components/shared/container";
 
-const FAQ_ITEMS = [
+export interface FAQItem {
+  question: string;
+  answer: string;
+}
+
+// Global fallback FAQs
+const GLOBAL_FAQ_ITEMS: FAQItem[] = [
   {
     question: "How do you vet alumni mentors?",
     answer:
@@ -15,7 +21,7 @@ const FAQ_ITEMS = [
   {
     question: "What happens after a trial call?",
     answer:
-      "You’ll receive a call summary, curated resources, and a recommended next session format—whether that’s interview prep, SOP review, or career planning.",
+      "You'll receive a call summary, curated resources, and a recommended next session format—whether that's interview prep, SOP review, or career planning.",
   },
   {
     question: "Do you support international applicants?",
@@ -24,7 +30,14 @@ const FAQ_ITEMS = [
   },
 ];
 
-export function FAQ() {
+interface FAQProps {
+  faqs?: FAQItem[];
+}
+
+export function FAQ({ faqs }: FAQProps) {
+  // Use provided FAQs (per-college) or fallback to global FAQs
+  const displayFAQs = faqs && faqs.length > 0 ? faqs : GLOBAL_FAQ_ITEMS;
+
   return (
     <section id="faq" className="bg-surface py-24 sm:py-32">
       <Container>
@@ -34,13 +47,13 @@ export function FAQ() {
               Frequently asked questions
             </h2>
             <p className="max-w-2xl text-base leading-relaxed text-foreground-muted sm:text-lg">
-              Everything you need to know about IQMento’s alumni mentorship—how
-              it works, who it’s for, and what happens after you book a call.
+              Everything you need to know about IQMento&apos;s alumni mentorship—how
+              it works, who it&apos;s for, and what happens after you book a call.
             </p>
           </div>
 
           <div className="grid gap-6 lg:grid-cols-2">
-            {FAQ_ITEMS.map((item) => (
+            {displayFAQs.map((item) => (
               <div
                 key={item.question}
                 className="rounded-3xl border border-[rgba(16,19,34,0.08)] bg-white/90 p-8 shadow-soft transition-transform duration-300 hover:-translate-y-1 hover:shadow-card"

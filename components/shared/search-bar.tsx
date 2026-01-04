@@ -40,7 +40,6 @@ export function SearchBar({
   className = "",
 }: SearchBarProps) {
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<SearchResult[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [focusedIndex, setFocusedIndex] = useState(-1);
   const searchRef = useRef<HTMLDivElement>(null);
@@ -70,12 +69,10 @@ export function SearchBar({
     [colleges, alumni]
   );
 
-  // Filter results based on query
-  useEffect(() => {
+  // Filter results based on query using useMemo
+  const results = useMemo(() => {
     if (!query.trim()) {
-      setResults([]);
-      setIsOpen(false);
-      return;
+      return [];
     }
 
     const searchTerm = query.toLowerCase().trim();
@@ -92,10 +89,15 @@ export function SearchBar({
       return nameMatch || locationMatch || subtitleMatch;
     });
 
-    setResults(filtered.slice(0, 8)); // Limit to 8 results
-    setIsOpen(filtered.length > 0);
-    setFocusedIndex(-1);
+    return filtered.slice(0, 8); // Limit to 8 results
   }, [query, allItems]);
+
+  // Update isOpen based on results
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setIsOpen(results.length > 0 && query.trim().length > 0);
+    setFocusedIndex(-1);
+  }, [results, query]);
 
   // Close dropdown when clicking outside
   useEffect(() => {

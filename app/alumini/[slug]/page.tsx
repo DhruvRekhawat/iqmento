@@ -14,6 +14,8 @@ import { Footer } from "@/components/sections/footer";
 import { Testimonials } from "@/components/sections/testimonials";
 import { getAlumniBySlug, getAlumni } from "@/lib/strapi";
 import { mapStrapiAlumniToAlumniProfile } from "@/lib/strapi-mappers";
+import { extractTestimonialsFromAlumni } from "@/lib/testimonials-utils";
+import type { Testimonial } from "@/components/sections/testimonials/Testimonials";
 
 type PageParams = {
   slug: string;
@@ -109,6 +111,24 @@ export default async function AlumniProfilePage({ params }: PageProps) {
     },
   });
 
+  // Fetch testimonials from alumni reviews
+  let testimonials: Testimonial[];
+  try {
+    const testimonialsResponse = await getAlumni({
+      populate: ["reviews"],
+      filters: {
+        publishedAt: { $notNull: true },
+      },
+      pagination: {
+        pageSize: 100,
+      },
+    });
+    testimonials = extractTestimonialsFromAlumni(testimonialsResponse.data);
+  } catch (error) {
+    console.error("Error fetching testimonials:", error);
+    testimonials = [];
+  }
+
   return (
     <>
       <Navigation />
@@ -121,7 +141,7 @@ export default async function AlumniProfilePage({ params }: PageProps) {
           currentSlug={profile.slug} 
           otherAlumni={otherAlumniResponse.data}
         />
-        <Testimonials />
+        <Testimonials testimonials={testimonials} />
         <CallToAction />
       </main>
       <Footer />

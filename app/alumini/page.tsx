@@ -7,9 +7,11 @@ import {
   AlumniValuePropsSection,
 } from "@/components/sections/alumni-directory";
 import { Testimonials } from "@/components/sections/testimonials";
+import type { Testimonial } from "@/components/sections/testimonials/Testimonials";
 import { CallToAction } from "@/components/sections/cta";
 import { Footer } from "@/components/sections/footer";
 import { getAlumni, getColleges } from "@/lib/strapi";
+import { extractTestimonialsFromAlumni } from "@/lib/testimonials-utils";
 
 export const metadata: Metadata = {
   title: "All Alumni Mentors — Book 1:1 Sessions | IQMento",
@@ -32,7 +34,7 @@ export const metadata: Metadata = {
 
 export default async function AlumniDirectoryPage() {
   const alumniResponse = await getAlumni({
-    populate: ["profile", "heroImage"],
+    populate: ["profile", "heroImage", "reviews"],
     filters: {
       publishedAt: { $notNull: true },
     },
@@ -52,6 +54,15 @@ export default async function AlumniDirectoryPage() {
     },
   });
 
+  // Extract testimonials from alumni reviews
+  let testimonials: Testimonial[];
+  try {
+    testimonials = extractTestimonialsFromAlumni(alumniResponse.data);
+  } catch (error) {
+    console.error("Error extracting testimonials:", error);
+    testimonials = [];
+  }
+
   return (
     <>
       <Navigation />
@@ -59,7 +70,7 @@ export default async function AlumniDirectoryPage() {
         <AlumniDirectoryHero alumni={alumniResponse.data} colleges={collegesResponse.data} />
         <FeaturedMentorsSection alumni={alumniResponse.data} />
         <AlumniValuePropsSection />
-        <Testimonials />
+        <Testimonials testimonials={testimonials} />
         <CallToAction />
       </main>
       <Footer />

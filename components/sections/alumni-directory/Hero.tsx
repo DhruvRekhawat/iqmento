@@ -51,7 +51,7 @@ export function AlumniDirectoryHero({ alumni = [], colleges = [] }: AlumniDirect
             </h1>
 
             <p className="max-w-2xl text-lg leading-relaxed text-[#55596D] sm:text-xl">
-              Get honest, 1:1 guidance from people who've been exactly where you want to go.
+              Get honest, 1:1 guidance from people who&apos;ve been exactly where you want to go.
             </p>
           </div>
 

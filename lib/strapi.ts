@@ -206,6 +206,7 @@ async function fetchStrapi<T>(
 export async function getAlumni(options?: {
   populate?: string | string[];
   filters?: {
+    slug?: string;
     isFeatured?: boolean;
     isBookable?: boolean;
     publishedAt?: { $notNull?: boolean };
@@ -288,6 +289,7 @@ export async function getAlumniBySlug(
 export async function getColleges(options?: {
   populate?: string | string[];
   filters?: {
+    slug?: string;
     publishedAt?: { $notNull?: boolean };
     // Filter by college type
     collegeType?: "IIT" | "NIT" | "IIM" | "NID" | "Medical" | "Law" | "Arts" | "Commerce" | "Engineering" | "Design" | "Business" | "Other";

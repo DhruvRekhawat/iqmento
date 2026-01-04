@@ -4,12 +4,15 @@ import { Navigation } from "@/components/sections/navigation";
 import { CallToAction } from "@/components/sections/cta";
 import { Footer } from "@/components/sections/footer";
 import { Testimonials } from "@/components/sections/testimonials";
+import type { Testimonial } from "@/components/sections/testimonials/Testimonials";
 import {
   CollegesExplorer,
   CollegesHero,
   FeaturedColleges,
 } from "@/components/sections/colleges";
 import { getColleges, getAlumni } from "@/lib/strapi";
+import { mapStrapiAlumniToAlumniProfile } from "@/lib/strapi-mappers";
+import { extractTestimonialsFromAlumni } from "@/lib/testimonials-utils";
 
 export const metadata: Metadata = {
   title: "All Colleges — Explore Mentors by Campus | IQMento",
@@ -52,14 +55,44 @@ export default async function AllCollegesPage() {
     },
   });
 
+  // Transform alumni data for search (ensure slug is always a string)
+  const alumniForSearch = alumniResponse.data.map((alum) => {
+    const profile = mapStrapiAlumniToAlumniProfile(alum);
+    return {
+      slug: profile.slug,
+      name: profile.name,
+      location: profile.location,
+      headline: profile.headline,
+      image: profile.image,
+    };
+  });
+
+  // Fetch testimonials from alumni reviews
+  let testimonials: Testimonial[];
+  try {
+    const testimonialsResponse = await getAlumni({
+      populate: ["reviews"],
+      filters: {
+        publishedAt: { $notNull: true },
+      },
+      pagination: {
+        pageSize: 100,
+      },
+    });
+    testimonials = extractTestimonialsFromAlumni(testimonialsResponse.data);
+  } catch (error) {
+    console.error("Error fetching testimonials:", error);
+    testimonials = [];
+  }
+
   return (
     <>
       <Navigation />
       <main className="bg-surface">
-        <CollegesHero colleges={collegesResponse.data} alumni={alumniResponse.data} />
+        <CollegesHero colleges={collegesResponse.data} alumni={alumniForSearch} />
         <CollegesExplorer colleges={collegesResponse.data} />
         <FeaturedColleges colleges={collegesResponse.data} />
-        <Testimonials />
+        <Testimonials testimonials={testimonials} />
         <CallToAction />
       </main>
       <Footer />
