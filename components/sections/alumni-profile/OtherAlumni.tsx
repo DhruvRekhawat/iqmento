@@ -35,7 +35,7 @@ export function OtherAlumniSection({ currentSlug, otherAlumni = [] }: OtherAlumn
               {[...others, ...others].map((profile, index) => (
                 <Link
                   key={`${profile.slug}-${index}`}
-                  href={`/alumini/${profile.slug}`}
+                  href={`/alumni/${profile.slug}`}
                   className="flex w-[320px] shrink-0 flex-col gap-5 rounded-[28px] border border-white/10 bg-white/10 p-6 text-white shadow-[0_38px_110px_-80px_rgba(0,0,0,0.9)] transition-transform duration-300 hover:-translate-y-2"
                 >
                   <div className="relative h-56 overflow-hidden rounded-2xl border border-white/15 bg-white/10">

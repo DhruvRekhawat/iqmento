@@ -3,6 +3,13 @@
  * Import all types from this file to ensure consistency across the application
  */
 
+// Topmate-style frontend app types (frontend-only)
+export type { UserRole, User } from "./auth";
+export type { Service } from "./services";
+export type { AvailabilitySlot } from "./availability";
+export type { Alumni, College, Booking, AlumniStats } from "./bookings";
+export type { Meeting } from "./meetings";
+
 // Base Strapi types
 export type {
   StrapiMedia,

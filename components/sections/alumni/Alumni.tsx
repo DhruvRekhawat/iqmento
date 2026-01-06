@@ -146,7 +146,7 @@ function MentorCard({
           size="md"
           className="mt-auto h-11 w-full rounded-full text-sm font-semibold"
         >
-          <Link href={`/alumini/${slug}`}>Talk to Alumni</Link>
+          <Link href={`/alumni/${slug}`}>Talk to Alumni</Link>
         </Button>
       </div>
     </article>

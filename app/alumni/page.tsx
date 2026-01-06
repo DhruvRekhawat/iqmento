@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     title: "All Alumni Mentors — Book 1:1 Sessions | IQMento",
     description:
       "Browse verified alumni mentors from IITs, NIDs, IIMs, global universities, and breakout startups. Book 1:1 sessions for portfolio reviews, interview prep, and career guidance.",
-    url: "https://iqmento.com/alumini",
+    url: "https://iqmento.com/alumni",
     siteName: "IQMento",
   },
   twitter: {

@@ -3,6 +3,7 @@ import { Clock, MonitorSmartphone } from "lucide-react";
 import { Container } from "@/components/shared/container";
 import { Button } from "@/components/ui/button";
 import type { AlumniProfile } from "@/data/alumni-profiles";
+import { BookCtaLink } from "@/components/booking/BookCtaLink";
 
 interface ProfileSessionsProps {
   profile: AlumniProfile;
@@ -55,9 +56,7 @@ export function ProfileSessionsSection({ profile }: ProfileSessionsProps) {
                   size="sm"
                   className="h-10 rounded-full px-5 text-xs font-semibold shadow-[0_16px_35px_rgba(79,57,246,0.45)]"
                 >
-                  <a href={profile.bookingUrl} target="_blank" rel="noopener noreferrer">
-                    Book Now
-                  </a>
+                  <BookCtaLink href={`/book/${profile.slug}/s_1`}>Book Now</BookCtaLink>
                 </Button>
               </div>
             </article>

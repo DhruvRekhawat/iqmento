@@ -4,6 +4,7 @@ import { Briefcase, Clock } from "lucide-react";
 import { Container } from "@/components/shared/container";
 import { Button } from "@/components/ui/button";
 import type { AlumniProfile } from "@/data/alumni-profiles";
+import { BookCtaLink } from "@/components/booking/BookCtaLink";
 
 interface AlumniProfileHeroProps {
   profile: AlumniProfile;
@@ -64,9 +65,7 @@ export function AlumniProfileHero({ profile }: AlumniProfileHeroProps) {
                   size="lg"
                   className="h-[48px] min-w-[160px] px-7 text-sm font-semibold shadow-[0_28px_70px_rgba(99,73,246,0.45)]"
                 >
-                  <a href={profile.bookingUrl} target="_blank" rel="noopener noreferrer">
-                    View Pricing
-                  </a>
+                  <BookCtaLink href={`/book/${profile.slug}/s_1`}>View Pricing</BookCtaLink>
                 </Button>
                 <Button
                   asChild

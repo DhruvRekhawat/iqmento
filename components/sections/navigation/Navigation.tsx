@@ -6,7 +6,7 @@ import { Container } from "@/components/shared/container";
 
 const NAV_ITEMS: { label: string; href: string }[] = [
   { label: "Colleges", href: "/colleges" },
-  { label: "Alumini", href: "/alumini" },
+  { label: "Alumni", href: "/alumni" },
   { label: "About Us", href: "/about-us" },
   { label: "FAQ", href: "#faq" },
   { label: "Become a Mentor", href: "#cta" },
@@ -50,7 +50,7 @@ export function Navigation() {
               size="md"
               className="hidden border-white/20 px-6 text-sm text-white/90 hover:text-white md:inline-flex"
             >
-              <Link href="#cta">Sign In</Link>
+              <Link href="/login">Sign In</Link>
             </Button>
             <Button
               asChild
@@ -58,7 +58,7 @@ export function Navigation() {
               size="md"
               className="px-7 text-sm font-semibold text-white"
             >
-              <Link href="#cta">Join Now</Link>
+              <Link href="/register">Join Now</Link>
             </Button>
           </div>
         </nav>
