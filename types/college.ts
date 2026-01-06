@@ -1,4 +1,4 @@
-import type { StrapiEntityAttributes, StrapiMedia, StrapiResponse } from "./strapi";
+import type { StrapiEntityAttributes, StrapiMedia } from "./strapi";
 import type { StrapiAlumni } from "./alumni";
 
 /**

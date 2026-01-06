@@ -3,6 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 
 import { PublicRoute } from "@/components/auth/PublicRoute";
 import { Container } from "@/components/shared/container";
@@ -12,7 +13,7 @@ import type { UserRole } from "@/types/auth";
 
 type RegisterRole = Extract<UserRole, "STUDENT" | "EDUCATOR">;
 
-export default function RegisterPage() {
+function RegisterForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const next = searchParams.get("next") || "";
@@ -26,27 +27,14 @@ export default function RegisterPage() {
   const landing = role === "EDUCATOR" ? "/dashboard/educator" : "/dashboard/student";
 
   return (
-    <PublicRoute>
-      <main className="bg-surface min-h-[calc(100vh-0px)] py-16 sm:py-24">
-        <Container className="max-w-[620px]">
-          <div className="radius-lg bg-surface-strong border border-[rgba(16,19,34,0.12)] shadow-soft p-8 sm:p-10">
-            <div className="flex flex-col gap-3">
-              <h1 className="text-3xl font-semibold tracking-tight text-foreground-strong">
-                Create account
-              </h1>
-              <p className="text-sm text-foreground-muted">
-                Choose your role to unlock the right dashboard. (Frontend-only mock auth.)
-              </p>
-            </div>
-
-            <form
-              className="mt-8 flex flex-col gap-5"
-              onSubmit={(e) => {
-                e.preventDefault();
-                register({ name, email, role });
-                router.replace(next ? decodeURIComponent(next) : landing);
-              }}
-            >
+    <form
+      className="mt-8 flex flex-col gap-5"
+      onSubmit={(e) => {
+        e.preventDefault();
+        register({ name, email, role });
+        router.replace(next ? decodeURIComponent(next) : landing);
+      }}
+    >
               <div className="grid gap-4 sm:grid-cols-2">
                 <label className="flex flex-col gap-2">
                   <span className="text-xs font-semibold uppercase tracking-[0.22em] text-foreground-muted">
@@ -124,7 +112,28 @@ export default function RegisterPage() {
                   <Link href="/login">Already have an account?</Link>
                 </Button>
               </div>
-            </form>
+    </form>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <PublicRoute>
+      <main className="bg-surface min-h-[calc(100vh-0px)] py-16 sm:py-24">
+        <Container className="max-w-[620px]">
+          <div className="radius-lg bg-surface-strong border border-[rgba(16,19,34,0.12)] shadow-soft p-8 sm:p-10">
+            <div className="flex flex-col gap-3">
+              <h1 className="text-3xl font-semibold tracking-tight text-foreground-strong">
+                Create account
+              </h1>
+              <p className="text-sm text-foreground-muted">
+                Choose your role to unlock the right dashboard. (Frontend-only mock auth.)
+              </p>
+            </div>
+
+            <Suspense fallback={<div className="mt-8">Loading...</div>}>
+              <RegisterForm />
+            </Suspense>
           </div>
         </Container>
       </main>

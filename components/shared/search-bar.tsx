@@ -145,7 +145,8 @@ export function SearchBar({
     }
   };
 
-  const handleResultClick = (result: SearchResult) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleResultClick = (_result: SearchResult) => {
     setIsOpen(false);
     setQuery("");
   };

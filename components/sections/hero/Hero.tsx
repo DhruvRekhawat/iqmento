@@ -4,7 +4,6 @@ import Image from "next/image";
 import { Section } from "@/components/shared/section";
 import { Button } from "@/components/ui/button";
 
-const HERO_TITLE = "Your College Insider Advantage.";
 const HERO_DESCRIPTION =
   "Cut through the noise. Hear real stories, real advice, and real insider intel from students and alumni who've walked your path.";
 

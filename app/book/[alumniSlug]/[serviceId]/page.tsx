@@ -57,6 +57,7 @@ export default function BookingFlowPage() {
       id: alumniSlug,
       slug: alumniSlug,
       name: alumniSlug,
+      headline: "Mentor",
       isBookable: true,
       college: { id: "c", name: "College", slug: "college", location: "" },
       services: [],

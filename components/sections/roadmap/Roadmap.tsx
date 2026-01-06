@@ -41,7 +41,7 @@ export function Roadmap() {
           </div>
 
           <div className="grid w-full gap-8 md:grid-cols-3">
-            {ROADMAP_STEPS.map((step, index) => (
+            {ROADMAP_STEPS.map((step) => (
               <article
                 key={step.title}
                 className="group relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-8 text-left shadow-[0_25px_70px_rgba(0,0,0,0.35)] backdrop-blur-3xl transition-transform duration-300 hover:-translate-y-2"

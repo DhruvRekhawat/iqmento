@@ -7,8 +7,6 @@ import type { Testimonial } from "@/components/sections/testimonials/Testimonial
 export function extractTestimonialsFromAlumni(
   alumni: StrapiAlumni[]
 ): Testimonial[] {
-  const testimonials: Testimonial[] = [];
-
   // Extract reviews from all alumni
   const testimonialsWithRating: Array<Testimonial & { rating?: number }> = [];
 
@@ -60,6 +58,7 @@ export function extractTestimonialsFromAlumni(
   });
 
   // Limit to top 10 testimonials and remove rating from output
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   return testimonialsWithRating.slice(0, 10).map(({ rating, ...testimonial }) => testimonial);
 }
 
