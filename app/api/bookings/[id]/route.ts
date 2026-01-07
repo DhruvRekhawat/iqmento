@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getAuthenticatedUser, unauthorizedResponse, notFoundResponse } from "@/lib/api-helpers";
+import { Prisma } from "@prisma/client";
 
 export async function GET(
   request: NextRequest,
@@ -85,7 +86,7 @@ export async function PUT(
 
     // If cancelling, free up the slot
     if (status === "CANCELLED" && booking.status !== "CANCELLED") {
-      await prisma.$transaction(async (tx) => {
+      await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
         await tx.booking.update({
           where: { id },
           data: { status },

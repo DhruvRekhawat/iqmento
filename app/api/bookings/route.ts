@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getAuthenticatedUser, unauthorizedResponse, badRequestResponse } from "@/lib/api-helpers";
+import { Prisma } from "@prisma/client";
 import crypto from "crypto";
 
 export async function GET(request: NextRequest) {
@@ -134,7 +135,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create booking and mark slot as booked in a transaction
-    const booking = await prisma.$transaction(async (tx) => {
+    const booking = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       // Mark slot as booked
       await tx.availabilitySlot.update({
         where: { id: slotId },
