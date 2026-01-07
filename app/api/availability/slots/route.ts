@@ -156,7 +156,7 @@ export async function POST(request: NextRequest) {
     });
 
     // Create new slots (avoid duplicates by checking time ranges)
-    const slotsToCreate = [];
+    const slotsToCreate: any[] = [];
     for (const slot of generatedSlots) {
       // Check if slot already exists (within same minute)
       const exists = existingBookedSlots.some((existing: { startTime: Date; educatorId: string }) => {
