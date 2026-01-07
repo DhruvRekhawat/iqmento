@@ -20,7 +20,7 @@ function getRazorpayInstance() {
   });
 
   if (!key_id || !key_secret) {
-    const missing = [];
+    const missing: any[] = [];
     if (!key_id) missing.push("RAZORPAY_KEY_ID");
     if (!key_secret) missing.push("RAZORPAY_KEY_SECRET");
     throw new Error(`Razorpay keys are missing: ${missing.join(", ")}. Please check your .env.local file and restart the server.`);
