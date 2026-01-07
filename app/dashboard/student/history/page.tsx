@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { LayoutDashboard, Calendar, History } from "lucide-react";
 
 import { AuthRoute } from "@/components/auth/AuthRoute";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
@@ -25,9 +26,9 @@ export default function StudentHistoryPage() {
         title="Student dashboard"
         subtitle="History"
         navItems={[
-          { label: "Overview", href: "/dashboard/student" },
-          { label: "Bookings", href: "/dashboard/student/bookings" },
-          { label: "History", href: "/dashboard/student/history" },
+          { label: "Overview", href: "/dashboard/student", icon: <LayoutDashboard className="w-5 h-5" /> },
+          { label: "Bookings", href: "/dashboard/student/bookings", icon: <Calendar className="w-5 h-5" /> },
+          { label: "History", href: "/dashboard/student/history", icon: <History className="w-5 h-5" /> },
         ]}
       >
         <div className="radius-lg bg-surface-strong border border-[rgba(16,19,34,0.12)] shadow-soft p-6">

@@ -15,19 +15,55 @@ function LoginForm() {
   const searchParams = useSearchParams();
   const next = searchParams.get("next") || "";
 
-  const { login } = useAuth();
+  const { login, isLoading, user } = useAuth();
 
   const [email, setEmail] = React.useState("");
+  const [password, setPassword] = React.useState("");
+  const [error, setError] = React.useState<string | null>(null);
+
+  // Redirect when user is authenticated
+  React.useEffect(() => {
+    if (user) {
+      let redirectPath = "/dashboard/student";
+      if (user.role === "EDUCATOR") {
+        redirectPath = "/dashboard/educator";
+      } else if (user.role === "ADMIN") {
+        redirectPath = "/admin";
+      }
+      
+      // Use next parameter if provided, otherwise use role-based redirect
+      if (next) {
+        try {
+          const decodedNext = decodeURIComponent(next);
+          router.replace(decodedNext);
+        } catch {
+          router.replace(redirectPath);
+        }
+      } else {
+        router.replace(redirectPath);
+      }
+    }
+  }, [user, next, router]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+
+    const result = await login({ email, password });
+    if (result.error) {
+      setError(result.error);
+    }
+    // Redirect will be handled by useEffect when user state updates
+  };
 
   return (
-    <form
-      className="mt-8 flex flex-col gap-5"
-      onSubmit={(e) => {
-        e.preventDefault();
-        login({ email, role: "STUDENT" });
-        router.replace(next ? decodeURIComponent(next) : "/dashboard/student");
-      }}
-    >
+    <form className="mt-8 flex flex-col gap-5" onSubmit={handleSubmit}>
+      {error && (
+        <div className="radius-md border border-[rgba(120,53,44,0.25)] bg-[rgba(120,53,44,0.08)] p-3 text-sm text-foreground-strong">
+          {error}
+        </div>
+      )}
+
       <label className="flex flex-col gap-2">
         <span className="text-xs font-semibold uppercase tracking-[0.22em] text-foreground-muted">
           Email
@@ -42,9 +78,23 @@ function LoginForm() {
         />
       </label>
 
+      <label className="flex flex-col gap-2">
+        <span className="text-xs font-semibold uppercase tracking-[0.22em] text-foreground-muted">
+          Password
+        </span>
+        <input
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          type="password"
+          required
+          placeholder="Enter your password"
+          className="h-12 w-full radius-md border border-[rgba(16,19,34,0.12)] bg-white px-4 text-sm text-foreground shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-[rgba(35,81,119,0.35)]"
+        />
+      </label>
+
       <div className="flex flex-col gap-3">
-        <Button type="submit" variant="accent" size="lg" className="w-full">
-          Continue
+        <Button type="submit" variant="accent" size="lg" className="w-full" disabled={isLoading}>
+          {isLoading ? "Signing in..." : "Sign in"}
         </Button>
         <Button asChild type="button" variant="outline" size="lg" className="w-full">
           <Link href="/register">Create an account</Link>
@@ -65,7 +115,7 @@ export default function LoginPage() {
                 Sign in
               </h1>
               <p className="text-sm text-foreground-muted">
-                Use your email to access your dashboard. This is frontend-only mock auth.
+                Sign in with your email and password to access your dashboard.
               </p>
             </div>
 

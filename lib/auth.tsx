@@ -10,13 +10,13 @@ type AuthState = {
 
 type LoginInput = {
   email: string;
-  role?: UserRole;
-  name?: string;
+  password: string;
 };
 
 type RegisterInput = {
   name: string;
   email: string;
+  password: string;
   role: Exclude<UserRole, "ADMIN">;
 };
 
@@ -25,12 +25,14 @@ type AuthContextValue = {
   role: UserRole | null;
   isAuthenticated: boolean;
   isHydrated: boolean;
-  login: (input: LoginInput) => void;
-  register: (input: RegisterInput) => void;
+  isLoading: boolean;
+  login: (input: LoginInput) => Promise<{ error?: string }>;
+  register: (input: RegisterInput) => Promise<{ error?: string }>;
   logout: () => void;
 };
 
-const STORAGE_KEY = "iqmento.auth.v1";
+const TOKEN_KEY = "iqmento.auth.token";
+const USER_KEY = "iqmento.auth.user";
 
 function safeParse<T>(value: string | null): T | null {
   if (!value) return null;
@@ -41,17 +43,12 @@ function safeParse<T>(value: string | null): T | null {
   }
 }
 
-function makeUserId(email: string) {
-  // stable-ish id for mock UI; not security related
-  return `u_${email.toLowerCase().replace(/[^a-z0-9]+/g, "_")}`;
-}
-
-function defaultNameFromEmail(email: string) {
-  const [local] = email.split("@");
-  const cleaned = (local || "User").replace(/[._-]+/g, " ").trim();
-  return cleaned.length > 0
-    ? cleaned.replace(/\b\w/g, (m) => m.toUpperCase())
-    : "User";
+function getAuthHeaders(): HeadersInit {
+  const token = typeof window !== "undefined" ? localStorage.getItem(TOKEN_KEY) : null;
+  return {
+    "Content-Type": "application/json",
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
 }
 
 const AuthContext = React.createContext<AuthContextValue | null>(null);
@@ -59,60 +56,124 @@ const AuthContext = React.createContext<AuthContextValue | null>(null);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = React.useState<AuthState>({ user: null });
   const [isHydrated, setIsHydrated] = React.useState(false);
+  const [isLoading, setIsLoading] = React.useState(false);
 
+  // Fetch user on mount if token exists
   React.useEffect(() => {
-    const stored = safeParse<AuthState>(window.localStorage.getItem(STORAGE_KEY));
-    if (stored?.user) {
-      setState({ user: stored.user });
+    if (typeof window === "undefined") {
+      setIsHydrated(true);
+      return;
     }
-    setIsHydrated(true);
+
+    const token = localStorage.getItem(TOKEN_KEY);
+    const storedUser = safeParse<User>(localStorage.getItem(USER_KEY));
+
+    if (token && storedUser) {
+      setState({ user: storedUser });
+      // Verify token is still valid by fetching current user
+      fetch("/api/auth/me", { headers: getAuthHeaders() })
+        .then((res) => {
+          if (res.ok) {
+            return res.json();
+          }
+          throw new Error("Invalid token");
+        })
+        .then((data) => {
+          if (data.user) {
+            setState({ user: data.user });
+            localStorage.setItem(USER_KEY, JSON.stringify(data.user));
+          }
+        })
+        .catch(() => {
+          // Token invalid, clear storage
+          localStorage.removeItem(TOKEN_KEY);
+          localStorage.removeItem(USER_KEY);
+          setState({ user: null });
+        })
+        .finally(() => {
+          setIsHydrated(true);
+        });
+    } else {
+      setIsHydrated(true);
+    }
   }, []);
 
-  const persist = React.useCallback((next: AuthState) => {
-    setState(next);
+  const persist = React.useCallback((user: User | null, token: string | null) => {
+    setState({ user });
+    if (typeof window !== "undefined") {
+      if (token) {
+        localStorage.setItem(TOKEN_KEY, token);
+      } else {
+        localStorage.removeItem(TOKEN_KEY);
+      }
+      if (user) {
+        localStorage.setItem(USER_KEY, JSON.stringify(user));
+      } else {
+        localStorage.removeItem(USER_KEY);
+      }
+    }
+  }, []);
+
+  const login = React.useCallback(async (input: LoginInput): Promise<{ error?: string }> => {
+    setIsLoading(true);
     try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: input.email, password: input.password }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setIsLoading(false);
+        return { error: data.error || "Login failed" };
+      }
+
+      persist(data.user, data.token);
+      setIsLoading(false);
+      return {};
     } catch {
-      // ignore storage failures (private mode / quota)
+      setIsLoading(false);
+      return { error: "Network error. Please try again." };
     }
-  }, []);
+  }, [persist]);
 
-  const login = React.useCallback(
-    (input: LoginInput) => {
-      const email = input.email.trim().toLowerCase();
-      if (!email) return;
+  const register = React.useCallback(async (input: RegisterInput): Promise<{ error?: string }> => {
+    setIsLoading(true);
+    try {
+      const response = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: input.email,
+          password: input.password,
+          name: input.name,
+          role: input.role,
+        }),
+      });
 
-      const nextUser: User = {
-        id: makeUserId(email),
-        email,
-        name: input.name?.trim() || defaultNameFromEmail(email),
-        role: input.role || "STUDENT",
-      };
+      const data = await response.json();
 
-      persist({ user: nextUser });
-    },
-    [persist]
-  );
+      if (!response.ok) {
+        setIsLoading(false);
+        return { error: data.error || "Registration failed" };
+      }
 
-  const register = React.useCallback(
-    (input: RegisterInput) => {
-      const email = input.email.trim().toLowerCase();
-      if (!email) return;
-
-      const nextUser: User = {
-        id: makeUserId(email),
-        email,
-        name: input.name.trim() || defaultNameFromEmail(email),
-        role: input.role,
-      };
-
-      persist({ user: nextUser });
-    },
-    [persist]
-  );
+      persist(data.user, data.token);
+      setIsLoading(false);
+      return {};
+    } catch {
+      setIsLoading(false);
+      return { error: "Network error. Please try again." };
+    }
+  }, [persist]);
 
   const logout = React.useCallback(() => {
-    persist({ user: null });
+    persist(null, null);
+    fetch("/api/auth/logout", { method: "POST" }).catch(() => {
+      // Ignore logout API errors
+    });
   }, [persist]);
 
   const value = React.useMemo<AuthContextValue>(() => {
@@ -122,11 +183,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       role,
       isAuthenticated: Boolean(state.user),
       isHydrated,
+      isLoading,
       login,
       register,
       logout,
     };
-  }, [state.user, isHydrated, login, register, logout]);
+  }, [state.user, isHydrated, isLoading, login, register, logout]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

@@ -5,6 +5,7 @@ import {
   AlumniDirectoryHero,
   FeaturedMentorsSection,
   AlumniValuePropsSection,
+  AllAlumniGrid,
 } from "@/components/sections/alumni-directory";
 import { Testimonials } from "@/components/sections/testimonials";
 import type { Testimonial } from "@/components/sections/testimonials/Testimonials";
@@ -69,6 +70,7 @@ export default async function AlumniDirectoryPage() {
       <main className="bg-surface">
         <AlumniDirectoryHero alumni={alumniResponse.data} colleges={collegesResponse.data} />
         <FeaturedMentorsSection alumni={alumniResponse.data} />
+        <AllAlumniGrid alumni={alumniResponse.data} />
         <AlumniValuePropsSection />
         <Testimonials testimonials={testimonials} />
         <CallToAction />

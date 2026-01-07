@@ -2,22 +2,59 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { LayoutDashboard, ShieldCheck, Briefcase, Calendar, BookOpen } from "lucide-react";
 
 import { EducatorRoute } from "@/components/auth/EducatorRoute";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { Button } from "@/components/ui/button";
-import { getBookings, getKycStatus } from "@/lib/mock-store";
 import { useAuth } from "@/lib/auth";
+
+function getAuthHeaders(): HeadersInit {
+  const token = typeof window !== "undefined" ? localStorage.getItem("iqmento.auth.token") : null;
+  return {
+    "Content-Type": "application/json",
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+}
 
 export default function EducatorDashboardPage() {
   const { user } = useAuth();
-  const educatorSlug = "rahul-iit-bombay";
-  const kycStatus = React.useMemo(() => getKycStatus(educatorSlug), [educatorSlug]);
-  const bookings = React.useMemo(() => getBookings(), []);
+  const [kycStatus, setKycStatus] = React.useState<string>("PENDING");
+  const [bookings, setBookings] = React.useState<Array<{ id: string; status: string; service: { price: number } | null }>>([]);
 
-  const todays = bookings.filter((b) => b.educator.slug === educatorSlug && b.status === "UPCOMING").slice(0, 3);
+  React.useEffect(() => {
+    if (!user) return;
+
+    async function fetchData() {
+      try {
+        // Fetch KYC status
+        const kycResponse = await fetch("/api/kyc", {
+          headers: getAuthHeaders(),
+        });
+        if (kycResponse.ok) {
+          const kycData = await kycResponse.json();
+          setKycStatus(kycData.kycStatus || "PENDING");
+        }
+
+        // Fetch bookings
+        const bookingsResponse = await fetch("/api/bookings", {
+          headers: getAuthHeaders(),
+        });
+        if (bookingsResponse.ok) {
+          const bookingsData = await bookingsResponse.json();
+          setBookings(bookingsData.bookings || []);
+        }
+      } catch (err) {
+        console.error("Error fetching dashboard data:", err);
+      }
+    }
+
+    fetchData();
+  }, [user]);
+
+  const todays = bookings.filter((b) => b.status === "UPCOMING").slice(0, 3);
   const earnings = bookings
-    .filter((b) => b.educator.slug === educatorSlug && b.status !== "CANCELLED")
+    .filter((b) => b.status !== "CANCELLED")
     .reduce((sum, b) => sum + (b.service?.price ?? 0), 0);
 
   return (
@@ -26,11 +63,11 @@ export default function EducatorDashboardPage() {
         title="Educator dashboard"
         subtitle={`Welcome${user?.name ? `, ${user.name}` : ""}`}
         navItems={[
-          { label: "Overview", href: "/dashboard/educator" },
-          { label: "KYC", href: "/dashboard/educator/kyc" },
-          { label: "Services", href: "/dashboard/educator/services" },
-          { label: "Availability", href: "/dashboard/educator/availability" },
-          { label: "Bookings", href: "/dashboard/educator/bookings" },
+          { label: "Overview", href: "/dashboard/educator", icon: <LayoutDashboard className="w-5 h-5" /> },
+          { label: "KYC", href: "/dashboard/educator/kyc", icon: <ShieldCheck className="w-5 h-5" /> },
+          { label: "Services", href: "/dashboard/educator/services", icon: <Briefcase className="w-5 h-5" /> },
+          { label: "Availability", href: "/dashboard/educator/availability", icon: <Calendar className="w-5 h-5" /> },
+          { label: "Bookings", href: "/dashboard/educator/bookings", icon: <BookOpen className="w-5 h-5" /> },
         ]}
       >
         <div
@@ -63,7 +100,7 @@ export default function EducatorDashboardPage() {
         <div className="mt-8 grid gap-6 lg:grid-cols-3">
           <div className="radius-lg bg-surface-strong border border-[rgba(16,19,34,0.12)] shadow-soft p-6">
             <div className="text-xs font-semibold uppercase tracking-[0.22em] text-foreground-muted">
-              Earnings (mock)
+              Earnings
             </div>
             <div className="mt-2 text-3xl font-semibold text-foreground-strong">₹{earnings}</div>
           </div>

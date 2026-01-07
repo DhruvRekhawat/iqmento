@@ -2,12 +2,20 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { LayoutDashboard, Calendar, History } from "lucide-react";
 
 import { AuthRoute } from "@/components/auth/AuthRoute";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { Button } from "@/components/ui/button";
-import { getBookings } from "@/lib/mock-store";
 import { useAuth } from "@/lib/auth";
+
+function getAuthHeaders(): HeadersInit {
+  const token = typeof window !== "undefined" ? localStorage.getItem("iqmento.auth.token") : null;
+  return {
+    "Content-Type": "application/json",
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+}
 
 function formatWhen(iso: string) {
   const d = new Date(iso);
@@ -22,8 +30,35 @@ function statusPill(status: string) {
 
 export default function StudentBookingsPage() {
   const { user } = useAuth();
-  const bookings = React.useMemo(() => getBookings(), []);
-  const myBookings = bookings.filter((b) => b.student.id === user?.id);
+  const [myBookings, setMyBookings] = React.useState<Array<{ id: string; status: string; educator: { name: string }; service: { title: string }; slot: { startTime: string } }>>([]);
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    if (!user) return;
+
+    async function fetchBookings() {
+      try {
+        setIsLoading(true);
+        const response = await fetch("/api/bookings", {
+          headers: getAuthHeaders(),
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch bookings");
+        }
+
+        const data = await response.json();
+        setMyBookings(data.bookings || []);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to load bookings");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchBookings();
+  }, [user]);
 
   return (
     <AuthRoute>
@@ -31,9 +66,9 @@ export default function StudentBookingsPage() {
         title="Student dashboard"
         subtitle="Bookings"
         navItems={[
-          { label: "Overview", href: "/dashboard/student" },
-          { label: "Bookings", href: "/dashboard/student/bookings" },
-          { label: "History", href: "/dashboard/student/history" },
+          { label: "Overview", href: "/dashboard/student", icon: <LayoutDashboard className="w-5 h-5" /> },
+          { label: "Bookings", href: "/dashboard/student/bookings", icon: <Calendar className="w-5 h-5" /> },
+          { label: "History", href: "/dashboard/student/history", icon: <History className="w-5 h-5" /> },
         ]}
       >
         <div className="radius-lg bg-surface-strong border border-[rgba(16,19,34,0.12)] shadow-soft overflow-hidden">
@@ -44,6 +79,16 @@ export default function StudentBookingsPage() {
             </Button>
           </div>
 
+          {error && (
+            <div className="p-6 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg">
+              {error}
+            </div>
+          )}
+          {isLoading && (
+            <div className="p-6 text-sm text-foreground-muted text-center">
+              Loading bookings...
+            </div>
+          )}
           <div className="divide-y divide-[rgba(16,19,34,0.06)]">
             {myBookings.map((b) => (
               <div key={b.id} className="p-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -51,7 +96,7 @@ export default function StudentBookingsPage() {
                   <div className="text-sm font-semibold text-foreground-strong">
                     {b.educator.name} · {b.service.title}
                   </div>
-                  <div className="text-sm text-foreground-muted">{formatWhen(b.slot.startTime)}</div>
+                  <div className="text-sm text-foreground-muted">{formatWhen(new Date(b.slot.startTime).toISOString())}</div>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-3">

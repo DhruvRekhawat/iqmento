@@ -1,3 +1,6 @@
+"use client";
+
+import * as React from "react";
 import { Clock, MonitorSmartphone } from "lucide-react";
 
 import { Container } from "@/components/shared/container";
@@ -7,9 +10,42 @@ import { BookCtaLink } from "@/components/booking/BookCtaLink";
 
 interface ProfileSessionsProps {
   profile: AlumniProfile;
+  services?: Array<{
+    id: string;
+    title: string;
+    description: string | null;
+    durationMinutes: number;
+    price: number;
+    active: boolean;
+  }>;
 }
 
-export function ProfileSessionsSection({ profile }: ProfileSessionsProps) {
+export function ProfileSessionsSection({ profile, services }: ProfileSessionsProps) {
+  // Use DB services if available, otherwise fall back to profile sessions
+  const displayServices = React.useMemo(() => {
+    if (services && services.length > 0) {
+      return services
+        .filter((s) => s.active)
+        .map((s) => ({
+          id: s.id,
+          title: s.title,
+          description: s.description || "",
+          duration: `${s.durationMinutes} min`,
+          format: "Video Call",
+          price: `₹${s.price}`,
+        }));
+    }
+    // Fallback to profile sessions
+    return profile.sessions.map((s) => ({
+      id: `session_${s.title}`,
+      title: s.title,
+      description: s.description,
+      duration: s.duration,
+      format: s.format,
+      price: s.price,
+    }));
+  }, [services, profile.sessions]);
+
   return (
     <section className="bg-[#0f101c] py-24 text-white sm:py-32">
       <Container className="flex flex-col gap-14">
@@ -28,40 +64,46 @@ export function ProfileSessionsSection({ profile }: ProfileSessionsProps) {
           </div>
         </header>
 
-        <div className="grid gap-8 lg:grid-cols-3">
-          {profile.sessions.map((session) => (
-            <article
-              key={`${profile.slug}-${session.title}`}
-              className="flex h-full flex-col gap-6 rounded-[28px] border border-white/8 bg-white/[0.06] p-8 shadow-[0_42px_120px_-80px_rgba(12,12,28,0.85)] backdrop-blur-lg transition-transform duration-300 hover:-translate-y-2"
-            >
-              <h3 className="text-xl font-semibold tracking-[-0.02em] text-white">{session.title}</h3>
-              <p className="flex-1 text-sm leading-relaxed text-white/70">{session.description}</p>
+        {displayServices.length === 0 ? (
+          <div className="text-center text-white/60 py-12">
+            No active services available at the moment.
+          </div>
+        ) : (
+          <div className="grid gap-8 lg:grid-cols-3">
+            {displayServices.map((session) => (
+              <article
+                key={session.id}
+                className="flex h-full flex-col gap-6 rounded-[28px] border border-white/8 bg-white/[0.06] p-8 shadow-[0_42px_120px_-80px_rgba(12,12,28,0.85)] backdrop-blur-lg transition-transform duration-300 hover:-translate-y-2"
+              >
+                <h3 className="text-xl font-semibold tracking-[-0.02em] text-white">{session.title}</h3>
+                <p className="flex-1 text-sm leading-relaxed text-white/70">{session.description}</p>
 
-              <div className="flex flex-wrap gap-3 text-xs font-semibold uppercase tracking-[0.28em] text-white/60">
-                <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2">
-                  <Clock className="h-4 w-4 text-[#9ca5ff]" />
-                  {session.duration}
-                </span>
-                <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2">
-                  <MonitorSmartphone className="h-4 w-4 text-[#9ca5ff]" />
-                  {session.format}
-                </span>
-              </div>
+                <div className="flex flex-wrap gap-3 text-xs font-semibold uppercase tracking-[0.28em] text-white/60">
+                  <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2">
+                    <Clock className="h-4 w-4 text-[#9ca5ff]" />
+                    {session.duration}
+                  </span>
+                  <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2">
+                    <MonitorSmartphone className="h-4 w-4 text-[#9ca5ff]" />
+                    {session.format}
+                  </span>
+                </div>
 
-              <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-5 py-4">
-                <span className="text-sm font-semibold text-white/80">{session.price}</span>
-                <Button
-                  asChild
-                  variant="accent"
-                  size="sm"
-                  className="h-10 rounded-full px-5 text-xs font-semibold shadow-[0_16px_35px_rgba(79,57,246,0.45)]"
-                >
-                  <BookCtaLink href={`/book/${profile.slug}/s_1`}>Book Now</BookCtaLink>
-                </Button>
-              </div>
-            </article>
-          ))}
-        </div>
+                <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-5 py-4">
+                  <span className="text-sm font-semibold text-white/80">{session.price}</span>
+                  <Button
+                    asChild
+                    variant="accent"
+                    size="sm"
+                    className="h-10 rounded-full px-5 text-xs font-semibold shadow-[0_16px_35px_rgba(79,57,246,0.45)]"
+                  >
+                    <BookCtaLink href={`/book/${profile.slug}/${session.id}`}>Book Now</BookCtaLink>
+                  </Button>
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
       </Container>
     </section>
   );

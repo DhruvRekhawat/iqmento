@@ -2,103 +2,184 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Mic, MicOff, PhoneOff, Video, VideoOff } from "lucide-react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 
 import { AuthRoute } from "@/components/auth/AuthRoute";
-import { Container } from "@/components/shared/container";
 import { Button } from "@/components/ui/button";
+import { VideoCall } from "@/components/meeting/VideoCall";
+import { useAuth } from "@/lib/auth";
+import { getAgoraToken, generateUidFromString } from "@/lib/agora";
+
+function getAuthHeaders(): HeadersInit {
+  const token = typeof window !== "undefined" ? localStorage.getItem("iqmento.auth.token") : null;
+  return {
+    "Content-Type": "application/json",
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+}
 
 export default function MeetingPage() {
   const params = useParams<{ meetingId: string }>();
+  const router = useRouter();
+  const { user } = useAuth();
   const meetingId = params.meetingId;
 
-  const [micOn, setMicOn] = React.useState(true);
-  const [camOn, setCamOn] = React.useState(true);
+  const [booking, setBooking] = React.useState<{ id: string; studentId: string; educatorId: string; service: { title: string } | null; educator: { name: string } | null; slot: { startTime: string } | null } | null>(null);
+  const [tokenData, setTokenData] = React.useState<{
+    token: string;
+    appId: string;
+  } | null>(null);
+  const [error, setError] = React.useState<string | null>(null);
+  const [isLoading, setIsLoading] = React.useState(true);
+
+  // Find booking and validate access
+  React.useEffect(() => {
+    if (!user || !meetingId) return;
+
+    async function fetchBooking() {
+      try {
+        setIsLoading(true);
+        
+        // Fetch booking from API
+        const response = await fetch(`/api/bookings/${meetingId}`, {
+          headers: getAuthHeaders(),
+        });
+
+        if (!response.ok) {
+          if (response.status === 404) {
+            setError("Booking not found");
+          } else if (response.status === 403) {
+            setError("You don't have access to this meeting");
+          } else {
+            setError("Failed to load booking");
+          }
+          setIsLoading(false);
+          return;
+        }
+
+        const data = await response.json();
+        const foundBooking = data.booking;
+
+        // Additional validation
+        if (!user || (foundBooking.studentId !== user.id && foundBooking.educatorId !== user.id)) {
+          setError("You don't have access to this meeting");
+          setIsLoading(false);
+          return;
+        }
+
+        setBooking(foundBooking);
+
+        // Generate token
+        const channelName = foundBooking.id; // Use booking ID as channel name for privacy
+        const uid = generateUidFromString(user.id);
+
+        const tokenResponse = await getAgoraToken(channelName, uid, "publisher");
+        setTokenData({
+          token: tokenResponse.token,
+          appId: tokenResponse.appId,
+        });
+        setIsLoading(false);
+      } catch (err) {
+        console.error("Failed to initialize meeting:", err);
+        setError(err instanceof Error ? err.message : "Failed to initialize meeting");
+        setIsLoading(false);
+      }
+    }
+
+    fetchBooking();
+  }, [user, meetingId]);
+
+  const handleLeave = () => {
+    // Redirect based on user role
+    const redirectPath = user?.role === "EDUCATOR" ? "/dashboard/educator/bookings" : "/dashboard/student/bookings";
+    router.push(redirectPath);
+  };
+
+  if (isLoading) {
+    return (
+      <AuthRoute>
+        <main className="bg-black text-white min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <div className="text-lg font-semibold mb-2">Initializing meeting...</div>
+            <div className="text-sm text-white/60">Please wait</div>
+          </div>
+        </main>
+      </AuthRoute>
+    );
+  }
+
+  if (error || !booking || !tokenData) {
+    return (
+      <AuthRoute>
+        <main className="bg-black text-white min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <div className="text-lg font-semibold mb-2 text-red-400">Error</div>
+            <div className="text-sm text-white/60 mb-4">{error || "Failed to load meeting"}</div>
+            <Button asChild variant="glass" size="sm" className="border-white/20 text-white/90">
+              <Link href={user?.role === "EDUCATOR" ? "/dashboard/educator/bookings" : "/dashboard/student/bookings"}>
+                Back to bookings
+              </Link>
+            </Button>
+          </div>
+        </main>
+      </AuthRoute>
+    );
+  }
+
+  const uid = generateUidFromString(user!.id);
+
+  // Format scheduled time
+  const formatScheduledTime = (startTime: string) => {
+    try {
+      const date = new Date(startTime);
+      return new Intl.DateTimeFormat("en-US", {
+        month: "short",
+        day: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true,
+      }).format(date);
+    } catch {
+      return "";
+    }
+  };
+
+  const scheduledTime = booking?.slot?.startTime ? formatScheduledTime(booking.slot.startTime) : "";
 
   return (
     <AuthRoute>
-      <main className="bg-black text-white min-h-[calc(100vh-0px)] py-10 sm:py-14">
-        <Container className="max-w-[1100px]">
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex flex-col gap-1">
-              <h1 className="text-2xl font-semibold tracking-tight">Meeting</h1>
-              <p className="text-sm text-white/65">Meeting ID: {meetingId}</p>
+      <main className="bg-black text-white min-h-screen flex flex-col">
+        {/* Header */}
+        <header className="border-b border-white/10 px-6 py-4">
+          <div className="max-w-[1920px] mx-auto flex items-center justify-between gap-4">
+            <div className="flex items-center gap-2 text-lg font-medium">
+              <span>{booking?.service?.title || "Service"}</span>
+              <span className="text-white/40">|</span>
+              <span className="text-white/80">{booking?.educator?.name || "Educator"}</span>
             </div>
-            <Button asChild variant="glass" size="sm" className="border-white/20 text-white/90">
-              <Link href="/dashboard/student/bookings">Back to bookings</Link>
-            </Button>
+            <div className="flex items-center gap-4">
+              {scheduledTime && (
+                <div className="text-sm text-white/60 hidden sm:block">{scheduledTime}</div>
+              )}
+              <Button asChild variant="glass" size="sm" className="border-white/20 text-white/90">
+                <Link href={user?.role === "EDUCATOR" ? "/dashboard/educator/bookings" : "/dashboard/student/bookings"}>
+                  Back to bookings
+                </Link>
+              </Button>
+            </div>
           </div>
+        </header>
 
-          <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_0.4fr]">
-            <section className="rounded-[24px] border border-white/10 bg-white/5 p-5 sm:p-6">
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="relative aspect-video overflow-hidden rounded-[18px] border border-white/10 bg-black/40">
-                  <div className="absolute inset-0 flex items-center justify-center text-sm text-white/60">
-                    {camOn ? "Video tile (You)" : "Camera off"}
-                  </div>
-                </div>
-                <div className="relative aspect-video overflow-hidden rounded-[18px] border border-white/10 bg-black/40">
-                  <div className="absolute inset-0 flex items-center justify-center text-sm text-white/60">
-                    Remote tile (placeholder)
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-                <Button
-                  type="button"
-                  variant="glass"
-                  size="icon"
-                  className="border-white/20 text-white"
-                  onClick={() => setMicOn((v) => !v)}
-                  aria-label={micOn ? "Mute microphone" : "Unmute microphone"}
-                >
-                  {micOn ? <Mic className="h-5 w-5" /> : <MicOff className="h-5 w-5" />}
-                </Button>
-                <Button
-                  type="button"
-                  variant="glass"
-                  size="icon"
-                  className="border-white/20 text-white"
-                  onClick={() => setCamOn((v) => !v)}
-                  aria-label={camOn ? "Turn off camera" : "Turn on camera"}
-                >
-                  {camOn ? <Video className="h-5 w-5" /> : <VideoOff className="h-5 w-5" />}
-                </Button>
-                <Button
-                  asChild
-                  variant="accent"
-                  size="md"
-                  className="px-6"
-                >
-                  <Link href="/dashboard/student/bookings">
-                    <span className="inline-flex items-center gap-2">
-                      <PhoneOff className="h-4 w-4" />
-                      Leave
-                    </span>
-                  </Link>
-                </Button>
-              </div>
-            </section>
-
-            <aside className="rounded-[24px] border border-white/10 bg-white/5 p-5 sm:p-6">
-              <div className="text-xs font-semibold uppercase tracking-[0.22em] text-white/60">
-                Meeting info
-              </div>
-              <div className="mt-4 grid gap-3 text-sm text-white/70">
-                <div className="rounded-[16px] border border-white/10 bg-black/30 p-4">
-                  <div className="text-white/85 font-semibold">Channel</div>
-                  <div className="mt-1 break-all">{meetingId}</div>
-                </div>
-                <div className="rounded-[16px] border border-white/10 bg-black/30 p-4">
-                  <div className="text-white/85 font-semibold">Status</div>
-                  <div className="mt-1">Mock Agora UI (no real video)</div>
-                </div>
-              </div>
-            </aside>
-          </div>
-        </Container>
+        {/* Video Section - Almost Full Screen */}
+        <div className="flex-1 flex flex-col min-h-0">
+          <VideoCall
+            appId={tokenData.appId}
+            channelName={booking.id}
+            token={tokenData.token}
+            uid={uid}
+            onLeave={handleLeave}
+          />
+        </div>
       </main>
     </AuthRoute>
   );

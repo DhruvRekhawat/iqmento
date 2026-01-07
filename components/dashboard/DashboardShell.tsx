@@ -12,6 +12,7 @@ import { useAuth } from "@/lib/auth";
 type NavItem = {
   label: string;
   href: string;
+  icon?: React.ReactNode;
 };
 
 export function DashboardShell({
@@ -29,7 +30,7 @@ export function DashboardShell({
   const { user, logout } = useAuth();
 
   return (
-    <div className="min-h-[calc(100vh-0px)] bg-surface">
+    <div className="min-h-[calc(100vh-0px)] bg-surface pb-20 md:pb-10">
       <header className="sticky top-0 z-40 bg-surface/80 backdrop-blur-xl border-b border-[rgba(16,19,34,0.08)]">
         <Container className="py-4">
           <div className="flex flex-wrap items-center justify-between gap-4">
@@ -52,7 +53,8 @@ export function DashboardShell({
             </div>
           </div>
 
-          <nav className="mt-4 flex flex-wrap gap-2">
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex flex-wrap gap-2 mt-4">
             {navItems.map((item) => {
               const active = pathname === item.href;
               return (
@@ -74,9 +76,35 @@ export function DashboardShell({
         </Container>
       </header>
 
-      <main className="py-10">
+      <main className="py-6 md:py-10">
         <Container>{children}</Container>
       </main>
+
+      {/* Mobile Bottom Navigation */}
+      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-surface/95 backdrop-blur-xl border-t border-[rgba(16,19,34,0.08)] md:hidden">
+        <div className="flex items-center justify-around px-2 py-2">
+          {navItems.map((item) => {
+            const active = pathname === item.href;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  "flex flex-col items-center justify-center gap-1 px-4 py-2 rounded-lg transition-colors min-w-[60px]",
+                  active
+                    ? "bg-primary-soft text-foreground-strong"
+                    : "text-foreground-muted"
+                )}
+              >
+                {item.icon && <span className="text-lg">{item.icon}</span>}
+                <span className="text-[10px] font-semibold uppercase tracking-[0.1em]">
+                  {item.label}
+                </span>
+              </Link>
+            );
+          })}
+        </div>
+      </nav>
     </div>
   );
 }

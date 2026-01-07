@@ -1,0 +1,103 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  role      String   // "STUDENT" | "EDUCATOR" | "ADMIN"
+  passwordHash String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Educator fields
+  educatorSlug String? @unique
+  kycStatus    String? // "PENDING" | "APPROVED" | "REJECTED"
+
+  // Relations
+  bookingsAsStudent Booking[] @relation("StudentBookings")
+  bookingsAsEducator Booking[] @relation("EducatorBookings")
+  services           Service[]
+  availabilityRules  AvailabilityRule[]
+}
+
+model Service {
+  id              String   @id @default(cuid())
+  educatorId      String
+  educator        User     @relation(fields: [educatorId], references: [id], onDelete: Cascade)
+  title           String
+  description     String?
+  durationMinutes Int
+  price           Float
+  active          Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  bookings Booking[]
+
+  @@index([educatorId])
+}
+
+model AvailabilityRule {
+  id              String   @id @default(cuid())
+  educatorId      String
+  educator        User     @relation(fields: [educatorId], references: [id], onDelete: Cascade)
+  startDate       DateTime
+  endDate         DateTime
+  daysOfWeek      String   // JSON array of numbers [0,1,2,3,4,5,6]
+  specificDates   String?  // JSON array of ISO date strings
+  startTime       String   // HH:mm format
+  durationMinutes Int
+  price           Float
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([educatorId])
+}
+
+model AvailabilitySlot {
+  id        String   @id @default(cuid())
+  educatorId String
+  startTime DateTime
+  endTime   DateTime
+  isBooked  Boolean  @default(false)
+  price     Float?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  bookings Booking[]
+
+  @@index([educatorId])
+  @@index([startTime])
+  @@index([isBooked])
+}
+
+model Booking {
+  id          String   @id @default(cuid())
+  studentId   String
+  student     User     @relation("StudentBookings", fields: [studentId], references: [id], onDelete: Cascade)
+  educatorId  String
+  educator    User     @relation("EducatorBookings", fields: [educatorId], references: [id], onDelete: Cascade)
+  serviceId   String
+  service     Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  slotId      String
+  slot        AvailabilitySlot @relation(fields: [slotId], references: [id], onDelete: Cascade)
+  status      String   // "UPCOMING" | "COMPLETED" | "CANCELLED"
+  // Payment fields
+  razorpayOrderId   String?
+  razorpayPaymentId String?
+  razorpaySignature String?
+  paymentStatus     String?  // "PENDING" | "COMPLETED" | "FAILED"
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([studentId])
+  @@index([educatorId])
+  @@index([status])
+}
+

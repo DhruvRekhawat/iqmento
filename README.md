@@ -2,6 +2,23 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
+### Environment Variables
+
+For video calling functionality, you need to set up Agora credentials:
+
+1. **AGORA_APP_ID** - Your Agora App ID (found in Agora Console → Project Management)
+2. **AGORA_APP_CERTIFICATE** - Your Agora App Certificate (enable App Certificate in Agora Console for token authentication)
+
+Add these to your `.env` file:
+```env
+AGORA_APP_ID=your_app_id_here
+AGORA_APP_CERTIFICATE=your_app_certificate_here
+```
+
+Note: `AGORA_CUSTOMER_ID` and `AGORA_SECRET` are for REST API (recording, analytics) and are separate from the App ID/Certificate needed for video SDK.
+
+### Running the Development Server
+
 First, run the development server:
 
 ```bash

@@ -128,7 +128,7 @@ export function SearchBar({
           e.preventDefault();
           if (focusedIndex >= 0 && results[focusedIndex]) {
             const result = results[focusedIndex];
-            window.location.href = `/${result.type === "college" ? "colleges" : "alumini"}/${result.slug}`;
+            window.location.href = `/${result.type === "college" ? "colleges" : "alumni"}/${result.slug}`;
           }
           return;
         case "Escape":
@@ -152,7 +152,7 @@ export function SearchBar({
   };
 
   const getResultHref = (result: SearchResult) => {
-    return `/${result.type === "college" ? "colleges" : "alumini"}/${result.slug}`;
+    return `/${result.type === "college" ? "colleges" : "alumni"}/${result.slug}`;
   };
 
   // Determine if custom styling is provided

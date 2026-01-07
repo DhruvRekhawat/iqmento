@@ -100,6 +100,30 @@ export default async function AlumniProfilePage({ params }: PageProps) {
 
   const profile = mapStrapiAlumniToAlumniProfile(alumniResponse.data);
 
+  // Fetch services from database for this educator
+  let services: Array<{ id: string; title: string; description: string | null; durationMinutes: number; price: number; active: boolean; createdAt: Date; updatedAt: Date; educatorId: string }> = [];
+  try {
+    const { prisma } = await import("@/lib/prisma");
+    const educator = await prisma.user.findUnique({
+      where: { educatorSlug: slug },
+      select: { id: true },
+    });
+    
+    if (educator) {
+      const dbServices = await prisma.service.findMany({
+        where: {
+          educatorId: educator.id,
+          active: true,
+        },
+        orderBy: { createdAt: "desc" },
+      });
+      services = dbServices;
+    }
+  } catch (error) {
+    console.error("Error fetching services from DB:", error);
+    // Fallback to profile sessions if DB fetch fails
+  }
+
   // Fetch other alumni for the "Other Alumni" section
   const otherAlumniResponse = await getAlumni({
     populate: ["profile"],
@@ -135,7 +159,7 @@ export default async function AlumniProfilePage({ params }: PageProps) {
       <main className="bg-surface">
         <AlumniProfileHero profile={profile} />
         <ProfileOverviewSection profile={profile} />
-        <ProfileSessionsSection profile={profile} />
+        <ProfileSessionsSection profile={profile} services={services} />
         <ProfileReviewsSection profile={profile} />
         <OtherAlumniSection 
           currentSlug={profile.slug} 

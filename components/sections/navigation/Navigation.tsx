@@ -1,8 +1,12 @@
+"use client";
+
+import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/shared/container";
+import { useAuth } from "@/lib/auth";
 
 const NAV_ITEMS: { label: string; href: string }[] = [
   { label: "Colleges", href: "/colleges" },
@@ -13,6 +17,15 @@ const NAV_ITEMS: { label: string; href: string }[] = [
 ];
 
 export function Navigation() {
+  const { user, isAuthenticated } = useAuth();
+  
+  const dashboardPath = React.useMemo(() => {
+    if (!user) return "/dashboard/student";
+    if (user.role === "EDUCATOR") return "/dashboard/educator";
+    if (user.role === "ADMIN") return "/admin";
+    return "/dashboard/student";
+  }, [user]);
+
   return (
     <header className="sticky top-0 z-50 w-full bg-black/95 text-white backdrop-blur-xl">
       <Container bleed>
@@ -44,22 +57,35 @@ export function Navigation() {
           </div>
 
           <div className="flex items-center gap-3">
-            <Button
-              asChild
-              variant="glass"
-              size="md"
-              className="hidden border-white/20 px-6 text-sm text-white/90 hover:text-white md:inline-flex"
-            >
-              <Link href="/login">Sign In</Link>
-            </Button>
-            <Button
-              asChild
-              variant="accent"
-              size="md"
-              className="px-7 text-sm font-semibold text-white"
-            >
-              <Link href="/register">Join Now</Link>
-            </Button>
+            {isAuthenticated ? (
+              <Button
+                asChild
+                variant="accent"
+                size="md"
+                className="px-7 text-sm font-semibold text-white"
+              >
+                <Link href={dashboardPath}>Dashboard</Link>
+              </Button>
+            ) : (
+              <>
+                <Button
+                  asChild
+                  variant="glass"
+                  size="md"
+                  className="hidden border-white/20 px-6 text-sm text-white/90 hover:text-white md:inline-flex"
+                >
+                  <Link href="/login">Sign In</Link>
+                </Button>
+                <Button
+                  asChild
+                  variant="accent"
+                  size="md"
+                  className="px-7 text-sm font-semibold text-white"
+                >
+                  <Link href="/register">Join Now</Link>
+                </Button>
+              </>
+            )}
           </div>
         </nav>
       </Container>

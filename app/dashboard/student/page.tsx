@@ -2,12 +2,20 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { LayoutDashboard, Calendar, History } from "lucide-react";
 
 import { AuthRoute } from "@/components/auth/AuthRoute";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { Button } from "@/components/ui/button";
-import { getBookings } from "@/lib/mock-store";
 import { useAuth } from "@/lib/auth";
+
+function getAuthHeaders(): HeadersInit {
+  const token = typeof window !== "undefined" ? localStorage.getItem("iqmento.auth.token") : null;
+  return {
+    "Content-Type": "application/json",
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+}
 
 function formatWhen(iso: string) {
   const d = new Date(iso);
@@ -16,14 +24,32 @@ function formatWhen(iso: string) {
 
 export default function StudentDashboardPage() {
   const { user } = useAuth();
-  const bookings = React.useMemo(() => getBookings(), []);
+  const [bookings, setBookings] = React.useState<Array<{ id: string; status: string; educator: { name: string }; service: { title: string }; slot: { startTime: string } }>>([]);
 
-  const myBookings = bookings.filter((b) => b.student.id === user?.id);
-  const upcoming = myBookings.filter((b) => b.status === "UPCOMING");
-  const completed = myBookings.filter((b) => b.status === "COMPLETED");
+  React.useEffect(() => {
+    if (!user) return;
 
-  const totalSessions = myBookings.length;
-  const totalSpent = myBookings.reduce((sum, b) => sum + (b.service?.price ?? 0), 0);
+    async function fetchBookings() {
+      try {
+        const response = await fetch("/api/bookings", {
+          headers: getAuthHeaders(),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setBookings(data.bookings || []);
+        }
+      } catch (err) {
+        console.error("Error fetching bookings:", err);
+      }
+    }
+
+    fetchBookings();
+  }, [user]);
+
+  const upcoming = bookings.filter((b) => b.status === "UPCOMING");
+  const completed = bookings.filter((b) => b.status === "COMPLETED");
+  const totalSessions = bookings.length;
 
   return (
     <AuthRoute>
@@ -31,24 +57,17 @@ export default function StudentDashboardPage() {
         title="Student dashboard"
         subtitle="Overview"
         navItems={[
-          { label: "Overview", href: "/dashboard/student" },
-          { label: "Bookings", href: "/dashboard/student/bookings" },
-          { label: "History", href: "/dashboard/student/history" },
+          { label: "Overview", href: "/dashboard/student", icon: <LayoutDashboard className="w-5 h-5" /> },
+          { label: "Bookings", href: "/dashboard/student/bookings", icon: <Calendar className="w-5 h-5" /> },
+          { label: "History", href: "/dashboard/student/history", icon: <History className="w-5 h-5" /> },
         ]}
       >
-        <div className="grid gap-6 lg:grid-cols-3">
+        <div className="grid gap-6 lg:grid-cols-2">
           <div className="radius-lg bg-surface-strong border border-[rgba(16,19,34,0.12)] shadow-soft p-6">
             <div className="text-xs font-semibold uppercase tracking-[0.22em] text-foreground-muted">
               Total sessions
             </div>
             <div className="mt-2 text-3xl font-semibold text-foreground-strong">{totalSessions}</div>
-          </div>
-
-          <div className="radius-lg bg-surface-strong border border-[rgba(16,19,34,0.12)] shadow-soft p-6">
-            <div className="text-xs font-semibold uppercase tracking-[0.22em] text-foreground-muted">
-              Total spent (mock)
-            </div>
-            <div className="mt-2 text-3xl font-semibold text-foreground-strong">₹{totalSpent}</div>
           </div>
 
           <div className="radius-lg bg-surface-strong border border-[rgba(16,19,34,0.12)] shadow-soft p-6">
@@ -85,7 +104,7 @@ export default function StudentDashboardPage() {
                       Upcoming
                     </span>
                   </div>
-                  <div className="mt-2 text-sm text-foreground-muted">{formatWhen(b.slot.startTime)}</div>
+                  <div className="mt-2 text-sm text-foreground-muted">{formatWhen(new Date(b.slot.startTime).toISOString())}</div>
                 </div>
               ))}
               {upcoming.length === 0 && (
@@ -115,7 +134,7 @@ export default function StudentDashboardPage() {
                       Completed
                     </span>
                   </div>
-                  <div className="mt-2 text-sm text-foreground-muted">{formatWhen(b.slot.startTime)}</div>
+                  <div className="mt-2 text-sm text-foreground-muted">{formatWhen(new Date(b.slot.startTime).toISOString())}</div>
                 </div>
               ))}
               {completed.length === 0 && (
