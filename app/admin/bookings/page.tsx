@@ -4,18 +4,61 @@ import * as React from "react";
 
 import { AdminRoute } from "@/components/auth/AdminRoute";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
-import { getBookings } from "@/lib/mock-store";
+
+function getAuthHeaders(): HeadersInit {
+  const token = typeof window !== "undefined" ? localStorage.getItem("iqmento.auth.token") : null;
+  return {
+    "Content-Type": "application/json",
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+}
 
 function formatWhen(iso: string) {
   const d = new Date(iso);
   return d.toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
 }
 
+type Booking = {
+  id: string;
+  status: string;
+  student: { id: string; name: string | null; email: string };
+  educator: { id: string; name: string | null; email: string; educatorSlug: string | null };
+  service: { id: string; title: string; description: string | null };
+  slot: { id: string; startTime: string; endTime: string };
+};
+
 export default function AdminBookingsPage() {
-  const bookings = React.useMemo(() => getBookings(), []);
+  const [bookings, setBookings] = React.useState<Booking[]>([]);
+  const [isLoading, setIsLoading] = React.useState(true);
   const [status, setStatus] = React.useState<"ALL" | "UPCOMING" | "COMPLETED" | "CANCELLED">("ALL");
 
-  const filtered = bookings.filter((b) => (status === "ALL" ? true : b.status === status));
+  React.useEffect(() => {
+    async function fetchBookings() {
+      try {
+        setIsLoading(true);
+        const url = status === "ALL" 
+          ? "/api/admin/bookings"
+          : `/api/admin/bookings?status=${status}`;
+        
+        const response = await fetch(url, {
+          headers: getAuthHeaders(),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setBookings(data.bookings || []);
+        }
+      } catch (err) {
+        console.error("Error fetching bookings:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchBookings();
+  }, [status]);
+
+  const filtered = bookings;
 
   return (
     <AdminRoute>
@@ -51,21 +94,24 @@ export default function AdminBookingsPage() {
           </div>
 
           <div className="divide-y divide-[rgba(16,19,34,0.06)]">
-            {filtered.map((b) => (
-              <div key={b.id} className="p-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex flex-col gap-1">
-                  <div className="text-sm font-semibold text-foreground-strong">
-                    {b.student.name} → {b.educator.name} · {b.service.title}
+            {isLoading ? (
+              <div className="p-6 text-sm text-foreground-muted text-center">Loading bookings...</div>
+            ) : filtered.length === 0 ? (
+              <div className="p-6 text-sm text-foreground-muted text-center">No bookings found.</div>
+            ) : (
+              filtered.map((b) => (
+                <div key={b.id} className="p-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex flex-col gap-1">
+                    <div className="text-sm font-semibold text-foreground-strong">
+                      {b.student.name || b.student.email} → {b.educator.name || b.educator.email} · {b.service.title}
+                    </div>
+                    <div className="text-sm text-foreground-muted">{formatWhen(b.slot.startTime)}</div>
                   </div>
-                  <div className="text-sm text-foreground-muted">{formatWhen(b.slot.startTime)}</div>
+                  <span className="rounded-full bg-surface-muted px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-foreground-strong">
+                    {b.status}
+                  </span>
                 </div>
-                <span className="rounded-full bg-surface-muted px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-foreground-strong">
-                  {b.status}
-                </span>
-              </div>
-            ))}
-            {filtered.length === 0 && (
-              <div className="p-6 text-sm text-foreground-muted">No bookings found.</div>
+              ))
             )}
           </div>
         </div>

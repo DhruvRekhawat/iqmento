@@ -5,13 +5,79 @@ import * as React from "react";
 import { AdminRoute } from "@/components/auth/AdminRoute";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { Button } from "@/components/ui/button";
-import { readMockStore, setKycStatus } from "@/lib/mock-store";
-import { mockAlumni } from "@/mocks/alumni";
+
+function getAuthHeaders(): HeadersInit {
+  const token = typeof window !== "undefined" ? localStorage.getItem("iqmento.auth.token") : null;
+  return {
+    "Content-Type": "application/json",
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+}
+
+type Educator = {
+  id: string;
+  name: string | null;
+  email: string;
+  educatorSlug: string | null;
+  kycStatus: string | null;
+  kycCollege: string | null;
+  kycGraduationYear: number | null;
+  kycLinkedin: string | null;
+  kycDocumentUrl: string | null;
+};
 
 export default function AdminEducatorsPage() {
-  const [store, setStore] = React.useState(() => readMockStore());
+  const [educators, setEducators] = React.useState<Educator[]>([]);
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [updatingId, setUpdatingId] = React.useState<string | null>(null);
 
-  const educators = mockAlumni;
+  React.useEffect(() => {
+    async function fetchEducators() {
+      try {
+        setIsLoading(true);
+        const response = await fetch("/api/admin/educators", {
+          headers: getAuthHeaders(),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setEducators(data.educators || []);
+        }
+      } catch (err) {
+        console.error("Error fetching educators:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchEducators();
+  }, []);
+
+  async function updateKycStatus(educatorId: string, status: string) {
+    try {
+      setUpdatingId(educatorId);
+      const response = await fetch("/api/admin/kyc", {
+        method: "PUT",
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ educatorId, kycStatus: status }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        // Update the educator in the list
+        setEducators((prev) =>
+          prev.map((e) => (e.id === educatorId ? data.educator : e))
+        );
+      } else {
+        alert("Failed to update KYC status");
+      }
+    } catch (err) {
+      console.error("Error updating KYC status:", err);
+      alert("Failed to update KYC status");
+    } finally {
+      setUpdatingId(null);
+    }
+  }
 
   return (
     <AdminRoute>
@@ -40,46 +106,61 @@ export default function AdminEducatorsPage() {
                 </tr>
               </thead>
               <tbody>
-                {educators.map((e) => {
-                  const status = store.kycStatusByEducatorSlug[e.slug] ?? "PENDING";
-                  return (
-                    <tr key={e.slug} className="border-b border-[rgba(16,19,34,0.06)]">
-                      <td className="p-4 font-semibold text-foreground-strong">{e.name}</td>
-                      <td className="p-4 text-foreground-muted">{e.college.name}</td>
-                      <td className="p-4">
-                        <span className="rounded-full bg-surface-muted px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-foreground-strong">
-                          {status}
-                        </span>
-                      </td>
-                      <td className="p-4">
-                        <div className="flex justify-end gap-2">
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              setKycStatus(e.slug, "APPROVED");
-                              setStore(readMockStore());
-                            }}
-                          >
-                            Approve
-                          </Button>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              setKycStatus(e.slug, "REJECTED");
-                              setStore(readMockStore());
-                            }}
-                          >
-                            Reject
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
+                {isLoading ? (
+                  <tr>
+                    <td colSpan={4} className="p-6 text-center text-sm text-foreground-muted">
+                      Loading educators...
+                    </td>
+                  </tr>
+                ) : educators.length === 0 ? (
+                  <tr>
+                    <td colSpan={4} className="p-6 text-center text-sm text-foreground-muted">
+                      No educators found.
+                    </td>
+                  </tr>
+                ) : (
+                  educators.map((e) => {
+                    const status = e.kycStatus || "PENDING";
+                    const isUpdating = updatingId === e.id;
+                    return (
+                      <tr key={e.id} className="border-b border-[rgba(16,19,34,0.06)]">
+                        <td className="p-4 font-semibold text-foreground-strong">
+                          {e.name || e.email}
+                        </td>
+                        <td className="p-4 text-foreground-muted">
+                          {e.kycCollege || "Not provided"}
+                        </td>
+                        <td className="p-4">
+                          <span className="rounded-full bg-surface-muted px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-foreground-strong">
+                            {status}
+                          </span>
+                        </td>
+                        <td className="p-4">
+                          <div className="flex justify-end gap-2">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => updateKycStatus(e.id, "APPROVED")}
+                              disabled={isUpdating}
+                            >
+                              Approve
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => updateKycStatus(e.id, "REJECTED")}
+                              disabled={isUpdating}
+                            >
+                              Reject
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
               </tbody>
             </table>
           </div>

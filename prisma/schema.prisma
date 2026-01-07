@@ -18,6 +18,11 @@ model User {
   // Educator fields
   educatorSlug String? @unique
   kycStatus    String? // "PENDING" | "APPROVED" | "REJECTED"
+  // KYC document fields
+  kycCollege        String?
+  kycGraduationYear Int?
+  kycLinkedin       String?
+  kycDocumentUrl    String? // URL to document stored in Strapi
 
   // Relations
   bookingsAsStudent Booking[] @relation("StudentBookings")

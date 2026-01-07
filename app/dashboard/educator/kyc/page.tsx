@@ -21,6 +21,14 @@ export default function EducatorKycPage() {
   const [status, setStatus] = React.useState<string>("PENDING");
   const [isLoading, setIsLoading] = React.useState(true);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [isUploading, setIsUploading] = React.useState(false);
+  
+  // Form fields
+  const [college, setCollege] = React.useState("");
+  const [graduationYear, setGraduationYear] = React.useState("");
+  const [linkedin, setLinkedin] = React.useState("");
+  const [documentFile, setDocumentFile] = React.useState<File | null>(null);
+  const [documentUrl, setDocumentUrl] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     if (!user) return;
@@ -35,6 +43,10 @@ export default function EducatorKycPage() {
         if (response.ok) {
           const data = await response.json();
           setStatus(data.kycStatus || "PENDING");
+          setCollege(data.college || "");
+          setGraduationYear(data.graduationYear ? String(data.graduationYear) : "");
+          setLinkedin(data.linkedin || "");
+          setDocumentUrl(data.documentUrl || null);
         }
       } catch (err) {
         console.error("Error fetching KYC status:", err);
@@ -45,6 +57,79 @@ export default function EducatorKycPage() {
 
     fetchKycStatus();
   }, [user]);
+
+  async function uploadDocument(file: File): Promise<string | null> {
+    try {
+      setIsUploading(true);
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        return data.url;
+      } else {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to upload document");
+      }
+    } catch (err) {
+      console.error("Error uploading document:", err);
+      alert(err instanceof Error ? err.message : "Failed to upload document");
+      return null;
+    } finally {
+      setIsUploading(false);
+    }
+  }
+
+  async function submitKycForm() {
+    try {
+      setIsSubmitting(true);
+
+      // Upload document if a new file is selected
+      let finalDocumentUrl = documentUrl;
+      if (documentFile) {
+        const uploadedUrl = await uploadDocument(documentFile);
+        if (!uploadedUrl) {
+          setIsSubmitting(false);
+          return;
+        }
+        finalDocumentUrl = uploadedUrl;
+      }
+
+      // Submit KYC form data
+      const response = await fetch("/api/kyc", {
+        method: "PUT",
+        headers: getAuthHeaders(),
+        body: JSON.stringify({
+          college: college || null,
+          graduationYear: graduationYear ? parseInt(graduationYear, 10) : null,
+          linkedin: linkedin || null,
+          documentUrl: finalDocumentUrl,
+          kycStatus: "PENDING", // Set to pending when submitting for review
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setStatus(data.kycStatus || "PENDING");
+        setDocumentUrl(data.documentUrl || null);
+        setDocumentFile(null);
+        alert("KYC submitted successfully! It will be reviewed by an admin.");
+      } else {
+        const error = await response.json();
+        alert(error.error || "Failed to submit KYC");
+      }
+    } catch (err) {
+      console.error("Error submitting KYC:", err);
+      alert("Failed to submit KYC");
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
 
   async function updateKycStatus(newStatus: string) {
     try {
@@ -86,7 +171,7 @@ export default function EducatorKycPage() {
           <section className="radius-lg bg-surface-strong border border-[rgba(16,19,34,0.12)] shadow-soft p-6">
             <div className="text-sm font-semibold text-foreground-strong">Verification</div>
             <div className="mt-2 text-sm text-foreground-muted">
-              Mock KYC form — no uploads are sent anywhere.
+              Submit your KYC documents for verification. All documents are securely stored.
             </div>
 
             <div className="mt-6 grid gap-4 sm:grid-cols-2">
@@ -95,7 +180,9 @@ export default function EducatorKycPage() {
                   College
                 </span>
                 <input
-                  defaultValue="IIT Bombay"
+                  value={college}
+                  onChange={(e) => setCollege(e.target.value)}
+                  placeholder="e.g., IIT Bombay"
                   className="h-12 radius-md border border-[rgba(16,19,34,0.12)] bg-white px-4 text-sm outline-none focus-visible:ring-2 focus-visible:ring-[rgba(35,81,119,0.35)]"
                 />
               </label>
@@ -104,27 +191,55 @@ export default function EducatorKycPage() {
                   Graduation year
                 </span>
                 <input
-                  defaultValue="2019"
+                  type="number"
+                  value={graduationYear}
+                  onChange={(e) => setGraduationYear(e.target.value)}
+                  placeholder="e.g., 2019"
+                  min="1950"
+                  max={new Date().getFullYear() + 5}
                   className="h-12 radius-md border border-[rgba(16,19,34,0.12)] bg-white px-4 text-sm outline-none focus-visible:ring-2 focus-visible:ring-[rgba(35,81,119,0.35)]"
                 />
               </label>
               <label className="flex flex-col gap-2 sm:col-span-2">
                 <span className="text-xs font-semibold uppercase tracking-[0.22em] text-foreground-muted">
-                  LinkedIn
+                  LinkedIn Profile URL
                 </span>
                 <input
-                  defaultValue="https://linkedin.com/in/demo"
+                  type="url"
+                  value={linkedin}
+                  onChange={(e) => setLinkedin(e.target.value)}
+                  placeholder="https://linkedin.com/in/your-profile"
                   className="h-12 radius-md border border-[rgba(16,19,34,0.12)] bg-white px-4 text-sm outline-none focus-visible:ring-2 focus-visible:ring-[rgba(35,81,119,0.35)]"
                 />
               </label>
               <label className="flex flex-col gap-2 sm:col-span-2">
                 <span className="text-xs font-semibold uppercase tracking-[0.22em] text-foreground-muted">
-                  Document upload (mock)
+                  Verification Document
                 </span>
                 <input
                   type="file"
+                  accept=".pdf,.jpg,.jpeg,.png,.webp"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      setDocumentFile(file);
+                    }
+                  }}
                   className="h-12 radius-md border border-[rgba(16,19,34,0.12)] bg-white px-4 text-sm outline-none"
                 />
+                {documentFile && (
+                  <div className="text-xs text-foreground-muted">
+                    Selected: {documentFile.name} ({(documentFile.size / 1024 / 1024).toFixed(2)} MB)
+                  </div>
+                )}
+                {documentUrl && !documentFile && (
+                  <div className="text-xs text-foreground-muted">
+                    Current document: <a href={documentUrl} target="_blank" rel="noopener noreferrer" className="underline">View</a>
+                  </div>
+                )}
+                <div className="text-xs text-foreground-muted mt-1">
+                  Accepted formats: PDF, JPG, PNG, WEBP (max 10MB)
+                </div>
               </label>
             </div>
 
@@ -133,10 +248,10 @@ export default function EducatorKycPage() {
                 type="button"
                 variant="accent"
                 size="sm"
-                onClick={() => updateKycStatus("PENDING")}
-                disabled={isSubmitting || isLoading}
+                onClick={submitKycForm}
+                disabled={isSubmitting || isLoading || isUploading}
               >
-                Submit for review
+                {isUploading ? "Uploading..." : isSubmitting ? "Submitting..." : "Submit for review"}
               </Button>
               {user?.role === "ADMIN" && (
                 <>
