@@ -159,7 +159,7 @@ export async function POST(request: NextRequest) {
     const slotsToCreate = [];
     for (const slot of generatedSlots) {
       // Check if slot already exists (within same minute)
-      const exists = existingBookedSlots.some((existing) => {
+      const exists = existingBookedSlots.some((existing: { startTime: Date; educatorId: string }) => {
         const existingStart = new Date(existing.startTime);
         const slotStart = new Date(slot.startTime);
         return (
