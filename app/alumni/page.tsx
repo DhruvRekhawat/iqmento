@@ -35,7 +35,7 @@ export const metadata: Metadata = {
 
 export default async function AlumniDirectoryPage() {
   const alumniResponse = await getAlumni({
-    populate: ["profile", "heroImage", "reviews"],
+    populate: ["profile", "heroImage"],
     filters: {
       publishedAt: { $notNull: true },
     },

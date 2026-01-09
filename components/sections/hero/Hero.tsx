@@ -1,8 +1,10 @@
 import * as React from "react";
 import Image from "next/image";
+import Link from "next/link";
 
 import { Section } from "@/components/shared/section";
 import { Button } from "@/components/ui/button";
+import { TrialCallBookingDialog } from "@/components/trial-call-booking-dialog";
 
 const HERO_DESCRIPTION =
   "Cut through the noise. Hear real stories, real advice, and real insider intel from students and alumni who've walked your path.";
@@ -29,16 +31,11 @@ export function Hero() {
                 variant="primary"
                 size="lg"
                 className="h-14 px-9 text-sm text-black shadow-[0_22px_60px_rgba(12,12,24,0.14)]"
+                asChild
               >
-                Find Your Mentor
+                <Link href="/alumni">Find Your Mentor</Link>
               </Button>
-              <Button
-                variant="accent"
-                size="lg"
-                className="h-14 px-9 text-sm shadow-[0_24px_60px_rgba(99,91,255,0.26)]"
-              >
-                Book Free Trial Call
-              </Button>
+              <TrialCallBookingDialog />
             </div>
           </div>
         </div>

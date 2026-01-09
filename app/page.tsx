@@ -28,7 +28,7 @@ export default async function Home() {
   let testimonials: Testimonial[];
   try {
     const alumniResponse = await getAlumni({
-      populate: ["reviews"],
+      populate: "*",
       filters: {
         publishedAt: { $notNull: true },
       },

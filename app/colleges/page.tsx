@@ -71,7 +71,7 @@ export default async function AllCollegesPage() {
   let testimonials: Testimonial[];
   try {
     const testimonialsResponse = await getAlumni({
-      populate: ["reviews"],
+      populate: "*",
       filters: {
         publishedAt: { $notNull: true },
       },

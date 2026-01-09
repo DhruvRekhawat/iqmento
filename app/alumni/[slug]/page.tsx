@@ -139,7 +139,7 @@ export default async function AlumniProfilePage({ params }: PageProps) {
   let testimonials: Testimonial[];
   try {
     const testimonialsResponse = await getAlumni({
-      populate: ["reviews"],
+      populate: "*",
       filters: {
         publishedAt: { $notNull: true },
       },
