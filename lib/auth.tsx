@@ -174,6 +174,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     fetch("/api/auth/logout", { method: "POST" }).catch(() => {
       // Ignore logout API errors
     });
+    // Redirect to home page after logout
+    if (typeof window !== "undefined") {
+      window.location.href = "/";
+    }
   }, [persist]);
 
   const value = React.useMemo<AuthContextValue>(() => {

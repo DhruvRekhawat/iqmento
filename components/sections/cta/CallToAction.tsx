@@ -1,7 +1,9 @@
 import Image from "next/image";
+import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/shared/container";
+import { TrialCallBookingDialog } from "@/components/trial-call-booking-dialog";
 
 export function CallToAction() {
   return (
@@ -32,16 +34,14 @@ export function CallToAction() {
               <Button
                 size="lg"
                 className="h-11 min-w-[170px] rounded-[12px] border border-white/25 bg-white text-sm font-semibold text-[#171628] shadow-[0_18px_45px_rgba(12,12,24,0.25)] hover:bg-white/95"
+                asChild
               >
-                Find Your Mentor
+                <Link href="/alumni">Find Your Mentor</Link>
               </Button>
-              <Button
-                variant="accent"
-                size="lg"
-                className="h-11 min-w-[180px] rounded-[12px] bg-[linear-gradient(125deg,#516BFF,#6C53FF,#B53BFF)] text-sm font-semibold shadow-[0_26px_70px_rgba(99,88,255,0.55)] hover:shadow-[0_32px_85px_rgba(99,88,255,0.65)]"
-              >
-                Book Free Trial Call
-              </Button>
+              <TrialCallBookingDialog
+                triggerSize="lg"
+                triggerClassName="h-11 min-w-[180px] rounded-[12px] bg-[linear-gradient(125deg,#516BFF,#6C53FF,#B53BFF)] text-sm font-semibold shadow-[0_26px_70px_rgba(99,88,255,0.55)] hover:shadow-[0_32px_85px_rgba(99,88,255,0.65)] border-none"
+              />
             </div>
           </div>
         </div>

@@ -1,0 +1,70 @@
+
+Mentor KYC Update Issue
+
+
+For mentors, there should be mandatory KYC fields where they can upload and update their KYC details.
+
+
+Currently, required KYC fields are missing or unclear.
+
+
+
+
+KYC Resubmission Bug
+
+
+After submitting KYC, the status shows “Pending”, but the system still allows the user to resubmit or refill all details again, which should not happen.
+
+
+The form should be locked until verification is complete or rejected.
+
+
+
+
+User Role Selection Issue
+
+
+While signing up, there should be a clear distinction between Student and Mentor.
+
+
+The role selection is currently confusing or not properly enforced.
+
+
+
+
+
+
+
+
+
+
+Educator Slot Duration Issue
+
+
+While booking sessions as an educator, the duration should be fixed options such as 5, 10, or 15 minutes.
+
+
+Currently, duration selection is not properly restricted.
+
+
+
+Educator Rule Creation Failure
+
+
+As an educator, I am unable to create a rule. The process fails without a clear error message.
+
+
+
+
+Ask a Question Feature Not Working
+
+
+The option to ask a question from a mentor is present but not functioning properly.
+
+
+
+
+Student Slot Booking Issue
+
+
+When logged in as a student, I am unable to book a slot with a mentor, even though slots are available.

@@ -15,7 +15,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
-export function TrialCallBookingDialog() {
+type TrialCallBookingDialogProps = {
+  triggerClassName?: string;
+  triggerSize?: "sm" | "md" | "lg" | "xl" | "icon";
+};
+
+export function TrialCallBookingDialog({
+  triggerClassName,
+  triggerSize = "lg",
+}: TrialCallBookingDialogProps = {}) {
   const [open, setOpen] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
@@ -76,8 +84,11 @@ export function TrialCallBookingDialog() {
       <DialogTrigger asChild>
         <Button
           variant="accent"
-          size="lg"
-          className="h-14 px-9 text-sm shadow-[0_24px_60px_rgba(99,91,255,0.26)]"
+          size={triggerSize}
+          className={
+            triggerClassName ||
+            "h-14 px-9 text-sm shadow-[0_24px_60px_rgba(99,91,255,0.26)]"
+          }
         >
           Book Free Trial Call
         </Button>

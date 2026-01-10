@@ -10,6 +10,7 @@ import { Container } from "@/components/shared/container";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
 import type { UserRole } from "@/types/auth";
+import { GraduationCap, Briefcase } from "lucide-react";
 
 type RegisterRole = Extract<UserRole, "STUDENT" | "EDUCATOR">;
 
@@ -26,10 +27,52 @@ function RegisterForm() {
   const [confirmPassword, setConfirmPassword] = React.useState("");
   const [role, setRole] = React.useState<RegisterRole>("STUDENT");
   const [error, setError] = React.useState<string | null>(null);
+  const [nameError, setNameError] = React.useState<string | null>(null);
+  const [emailError, setEmailError] = React.useState<string | null>(null);
+
+  const validateName = (value: string): boolean => {
+    // Only allow alphabetic characters and spaces
+    const nameRegex = /^[A-Za-z\s]+$/;
+    if (!value.trim()) {
+      setNameError("Name is required");
+      return false;
+    }
+    if (!nameRegex.test(value)) {
+      setNameError("Name should only contain letters and spaces");
+      return false;
+    }
+    setNameError(null);
+    return true;
+  };
+
+  const validateEmail = (value: string): boolean => {
+    // Proper email validation regex
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!value.trim()) {
+      setEmailError("Email is required");
+      return false;
+    }
+    if (!emailRegex.test(value)) {
+      setEmailError("Please enter a valid email address");
+      return false;
+    }
+    setEmailError(null);
+    return true;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+
+    // Validate name
+    if (!validateName(name)) {
+      return;
+    }
+
+    // Validate email
+    if (!validateEmail(email)) {
+      return;
+    }
 
     if (password.length < 6) {
       setError("Password must be at least 6 characters");
@@ -66,12 +109,28 @@ function RegisterForm() {
           </span>
           <input
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={(e) => {
+              // Only allow alphabetic characters and spaces
+              const filteredValue = e.target.value.replace(/[^A-Za-z\s]/g, "");
+              setName(filteredValue);
+              if (nameError) {
+                validateName(filteredValue);
+              }
+            }}
+            onBlur={(e) => validateName(e.target.value)}
             type="text"
             required
             placeholder="Your name"
-            className="h-12 w-full radius-md border border-[rgba(16,19,34,0.12)] bg-white px-4 text-sm text-foreground shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-[rgba(35,81,119,0.35)]"
+            className={[
+              "h-12 w-full radius-md border bg-white px-4 text-sm text-foreground shadow-sm outline-none focus-visible:ring-2",
+              nameError
+                ? "border-[rgba(120,53,44,0.45)] focus-visible:ring-[rgba(120,53,44,0.35)]"
+                : "border-[rgba(16,19,34,0.12)] focus-visible:ring-[rgba(35,81,119,0.35)]",
+            ].join(" ")}
           />
+          {nameError && (
+            <span className="text-xs text-[rgba(120,53,44,0.85)]">{nameError}</span>
+          )}
         </label>
 
         <label className="flex flex-col gap-2">
@@ -80,12 +139,26 @@ function RegisterForm() {
           </span>
           <input
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              if (emailError) {
+                validateEmail(e.target.value);
+              }
+            }}
+            onBlur={(e) => validateEmail(e.target.value)}
             type="email"
             required
             placeholder="you@example.com"
-            className="h-12 w-full radius-md border border-[rgba(16,19,34,0.12)] bg-white px-4 text-sm text-foreground shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-[rgba(35,81,119,0.35)]"
+            className={[
+              "h-12 w-full radius-md border bg-white px-4 text-sm text-foreground shadow-sm outline-none focus-visible:ring-2",
+              emailError
+                ? "border-[rgba(120,53,44,0.45)] focus-visible:ring-[rgba(120,53,44,0.35)]"
+                : "border-[rgba(16,19,34,0.12)] focus-visible:ring-[rgba(35,81,119,0.35)]",
+            ].join(" ")}
           />
+          {emailError && (
+            <span className="text-xs text-[rgba(120,53,44,0.85)]">{emailError}</span>
+          )}
         </label>
       </div>
 
@@ -121,10 +194,7 @@ function RegisterForm() {
         </label>
       </div>
 
-              <fieldset className="flex flex-col gap-3">
-                <legend className="text-xs font-semibold uppercase tracking-[0.22em] text-foreground-muted">
-                  Role
-                </legend>
+              <div className="flex flex-col gap-3">
                 <div className="grid gap-3 sm:grid-cols-2">
                   <button
                     type="button"
@@ -136,7 +206,10 @@ function RegisterForm() {
                         : "border-[rgba(16,19,34,0.12)] bg-white hover:bg-surface-muted/60",
                     ].join(" ")}
                   >
-                    <div className="text-sm font-semibold text-foreground-strong">Student</div>
+                    <div className="flex items-center gap-2">
+                      <GraduationCap className="h-5 w-5 text-primary" />
+                      <div className="text-sm font-semibold text-foreground-strong">Student</div>
+                    </div>
                     <div className="mt-1 text-xs text-foreground-muted">
                       Book sessions, manage bookings, meeting history.
                     </div>
@@ -152,13 +225,16 @@ function RegisterForm() {
                         : "border-[rgba(16,19,34,0.12)] bg-white hover:bg-surface-muted/60",
                     ].join(" ")}
                   >
-                    <div className="text-sm font-semibold text-foreground-strong">Educator</div>
+                    <div className="flex items-center gap-2">
+                      <Briefcase className="h-5 w-5 text-primary" />
+                      <div className="text-sm font-semibold text-foreground-strong">Educator</div>
+                    </div>
                     <div className="mt-1 text-xs text-foreground-muted">
                       Add services, manage availability, handle bookings.
                     </div>
                   </button>
                 </div>
-              </fieldset>
+              </div>
 
       <div className="flex flex-col gap-3">
         <Button type="submit" variant="accent" size="lg" className="w-full" disabled={isLoading}>
