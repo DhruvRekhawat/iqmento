@@ -25,11 +25,29 @@ type TrialCall = {
   updatedAt: string;
 };
 
+type Question = {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  message: string;
+  createdAt: string;
+  updatedAt: string;
+  educator?: {
+    id: string;
+    name: string | null;
+    email: string;
+    educatorSlug: string | null;
+  };
+};
+
 export default function AdminOverviewPage() {
   const [totalBookings, setTotalBookings] = React.useState(0);
   const [pendingKyc, setPendingKyc] = React.useState(0);
   const [totalTrialCalls, setTotalTrialCalls] = React.useState(0);
   const [trialCalls, setTrialCalls] = React.useState<TrialCall[]>([]);
+  const [totalQuestions, setTotalQuestions] = React.useState(0);
+  const [questions, setQuestions] = React.useState<Question[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
 
   React.useEffect(() => {
@@ -66,6 +84,16 @@ export default function AdminOverviewPage() {
           const trialCallsData = await trialCallsResponse.json();
           setTrialCalls(trialCallsData.trialCalls || []);
           setTotalTrialCalls(trialCallsData.trialCalls?.length || 0);
+        }
+
+        // Fetch questions
+        const questionsResponse = await fetch("/api/questions", {
+          headers: getAuthHeaders(),
+        });
+        if (questionsResponse.ok) {
+          const questionsData = await questionsResponse.json();
+          setQuestions(questionsData.questions || []);
+          setTotalQuestions(questionsData.questions?.length || 0);
         }
       } catch (err) {
         console.error("Error fetching admin stats:", err);
@@ -116,17 +144,95 @@ export default function AdminOverviewPage() {
             </div>
             <div className="radius-lg bg-surface-strong border border-[rgba(16,19,34,0.12)] shadow-soft p-6">
               <div className="text-xs font-semibold uppercase tracking-[0.22em] text-foreground-muted">
-                Actions
+                Questions
               </div>
-              <div className="mt-4 grid gap-2">
-                <Button asChild variant="accent" size="sm" className="w-full">
-                  <Link href="/admin/educators">Review educators</Link>
-                </Button>
-                <Button asChild variant="outline" size="sm" className="w-full">
-                  <Link href="/admin/bookings">View bookings</Link>
-                </Button>
+              <div className="mt-2 text-3xl font-semibold text-foreground-strong">
+                {isLoading ? "..." : totalQuestions}
               </div>
             </div>
+          </div>
+
+          <div className="radius-lg bg-surface-strong border border-[rgba(16,19,34,0.12)] shadow-soft p-6">
+            <h2 className="text-lg font-semibold text-foreground-strong mb-4">
+              Recent Questions
+            </h2>
+            {isLoading ? (
+              <div className="text-center py-8 text-foreground-muted">Loading...</div>
+            ) : questions.length === 0 ? (
+              <div className="text-center py-8 text-foreground-muted">
+                No questions yet.
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-[rgba(16,19,34,0.12)]">
+                      <th className="text-left py-3 px-4 text-xs font-semibold uppercase tracking-[0.22em] text-foreground-muted">
+                        Name
+                      </th>
+                      <th className="text-left py-3 px-4 text-xs font-semibold uppercase tracking-[0.22em] text-foreground-muted">
+                        Email
+                      </th>
+                      <th className="text-left py-3 px-4 text-xs font-semibold uppercase tracking-[0.22em] text-foreground-muted">
+                        Phone
+                      </th>
+                      <th className="text-left py-3 px-4 text-xs font-semibold uppercase tracking-[0.22em] text-foreground-muted">
+                        Message
+                      </th>
+                      <th className="text-left py-3 px-4 text-xs font-semibold uppercase tracking-[0.22em] text-foreground-muted">
+                        Educator
+                      </th>
+                      <th className="text-left py-3 px-4 text-xs font-semibold uppercase tracking-[0.22em] text-foreground-muted">
+                        Submitted
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {questions.map((question) => (
+                      <tr
+                        key={question.id}
+                        className="border-b border-[rgba(16,19,34,0.08)] hover:bg-surface-muted/50"
+                      >
+                        <td className="py-3 px-4 text-sm text-foreground-strong font-medium">
+                          {question.name}
+                        </td>
+                        <td className="py-3 px-4 text-sm text-foreground">
+                          <a
+                            href={`mailto:${question.email}`}
+                            className="text-primary hover:underline"
+                          >
+                            {question.email}
+                          </a>
+                        </td>
+                        <td className="py-3 px-4 text-sm text-foreground">
+                          <a
+                            href={`tel:${question.phone}`}
+                            className="text-primary hover:underline"
+                          >
+                            {question.phone}
+                          </a>
+                        </td>
+                        <td className="py-3 px-4 text-sm text-foreground-muted max-w-xs truncate">
+                          {question.message}
+                        </td>
+                        <td className="py-3 px-4 text-sm text-foreground-muted">
+                          {question.educator?.name || question.educator?.email || "Unknown"}
+                        </td>
+                        <td className="py-3 px-4 text-sm text-foreground-muted">
+                          {new Date(question.createdAt).toLocaleDateString("en-US", {
+                            year: "numeric",
+                            month: "short",
+                            day: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
 
           <div className="radius-lg bg-surface-strong border border-[rgba(16,19,34,0.12)] shadow-soft p-6">

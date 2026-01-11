@@ -173,6 +173,13 @@ export default function EducatorKycPage() {
             <div className="mt-2 text-sm text-foreground-muted">
               Submit your KYC documents for verification. All documents are securely stored.
             </div>
+            {status === "PENDING" && (
+              <div className="mt-4 rounded-lg bg-yellow-50 border border-yellow-200 p-3">
+                <p className="text-sm text-yellow-800">
+                  Your KYC is currently under review. You cannot modify the form until the review is complete.
+                </p>
+              </div>
+            )}
 
             <div className="mt-6 grid gap-4 sm:grid-cols-2">
               <label className="flex flex-col gap-2">
@@ -183,7 +190,8 @@ export default function EducatorKycPage() {
                   value={college}
                   onChange={(e) => setCollege(e.target.value)}
                   placeholder="e.g., IIT Bombay"
-                  className="h-12 radius-md border border-[rgba(16,19,34,0.12)] bg-white px-4 text-sm outline-none focus-visible:ring-2 focus-visible:ring-[rgba(35,81,119,0.35)]"
+                  disabled={status === "PENDING"}
+                  className="h-12 radius-md border border-[rgba(16,19,34,0.12)] bg-white px-4 text-sm outline-none focus-visible:ring-2 focus-visible:ring-[rgba(35,81,119,0.35)] disabled:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-60"
                 />
               </label>
               <label className="flex flex-col gap-2">
@@ -197,7 +205,8 @@ export default function EducatorKycPage() {
                   placeholder="e.g., 2019"
                   min="1950"
                   max={new Date().getFullYear() + 5}
-                  className="h-12 radius-md border border-[rgba(16,19,34,0.12)] bg-white px-4 text-sm outline-none focus-visible:ring-2 focus-visible:ring-[rgba(35,81,119,0.35)]"
+                  disabled={status === "PENDING"}
+                  className="h-12 radius-md border border-[rgba(16,19,34,0.12)] bg-white px-4 text-sm outline-none focus-visible:ring-2 focus-visible:ring-[rgba(35,81,119,0.35)] disabled:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-60"
                 />
               </label>
               <label className="flex flex-col gap-2 sm:col-span-2">
@@ -209,7 +218,8 @@ export default function EducatorKycPage() {
                   value={linkedin}
                   onChange={(e) => setLinkedin(e.target.value)}
                   placeholder="https://linkedin.com/in/your-profile"
-                  className="h-12 radius-md border border-[rgba(16,19,34,0.12)] bg-white px-4 text-sm outline-none focus-visible:ring-2 focus-visible:ring-[rgba(35,81,119,0.35)]"
+                  disabled={status === "PENDING"}
+                  className="h-12 radius-md border border-[rgba(16,19,34,0.12)] bg-white px-4 text-sm outline-none focus-visible:ring-2 focus-visible:ring-[rgba(35,81,119,0.35)] disabled:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-60"
                 />
               </label>
               <label className="flex flex-col gap-2 sm:col-span-2">
@@ -225,7 +235,8 @@ export default function EducatorKycPage() {
                       setDocumentFile(file);
                     }
                   }}
-                  className="h-12 radius-md border border-[rgba(16,19,34,0.12)] bg-white px-4 text-sm outline-none"
+                  disabled={status === "PENDING"}
+                  className="h-12 radius-md border border-[rgba(16,19,34,0.12)] bg-white px-4 text-sm outline-none disabled:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-60"
                 />
                 {documentFile && (
                   <div className="text-xs text-foreground-muted">
@@ -249,7 +260,7 @@ export default function EducatorKycPage() {
                 variant="accent"
                 size="sm"
                 onClick={submitKycForm}
-                disabled={isSubmitting || isLoading || isUploading}
+                disabled={isSubmitting || isLoading || isUploading || status === "PENDING"}
               >
                 {isUploading ? "Uploading..." : isSubmitting ? "Submitting..." : "Submit for review"}
               </Button>

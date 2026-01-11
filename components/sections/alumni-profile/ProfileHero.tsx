@@ -5,6 +5,7 @@ import { Container } from "@/components/shared/container";
 import { Button } from "@/components/ui/button";
 import type { AlumniProfile } from "@/data/alumni-profiles";
 import { BookCtaLink } from "@/components/booking/BookCtaLink";
+import { QuestionDialog } from "@/components/question-dialog";
 
 interface AlumniProfileHeroProps {
   profile: AlumniProfile;
@@ -67,16 +68,11 @@ export function AlumniProfileHero({ profile }: AlumniProfileHeroProps) {
                 >
                   <BookCtaLink href={`/book/${profile.slug}/s_1`}>View Pricing</BookCtaLink>
                 </Button>
-                <Button
-                  asChild
-                  variant="outline"
-                  size="lg"
-                  className="h-[48px] min-w-[160px] border-white/25 bg-transparent px-7 text-sm font-semibold text-white/90 hover:bg-white/10"
-                >
-                  <a href={profile.questionUrl} target="_blank" rel="noopener noreferrer">
-                    Ask a Question
-                  </a>
-                </Button>
+                <QuestionDialog
+                  educatorSlug={profile.slug}
+                  triggerSize="lg"
+                  triggerClassName="h-[48px] min-w-[160px] border-white/25 bg-transparent px-7 text-sm font-semibold text-white/90 hover:bg-white/10"
+                />
               </div>
             </div>
           </div>
