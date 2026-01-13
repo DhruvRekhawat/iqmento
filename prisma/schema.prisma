@@ -8,7 +8,8 @@ datasource db {
 
 model User {
   id        String   @id @default(cuid())
-  email     String   @unique
+  email     String?  @unique
+  phone     String   @unique
   name      String?
   role      String   // "STUDENT" | "EDUCATOR" | "ADMIN"
   passwordHash String?
@@ -134,4 +135,16 @@ model Question {
   @@index([email])
   @@index([createdAt])
   @@index([educatorId])
+}
+
+model Otp {
+  id        String   @id @default(cuid())
+  phone     String
+  otp       String
+  expiresAt DateTime
+  verified  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([phone])
+  @@index([expiresAt])
 }

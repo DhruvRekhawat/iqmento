@@ -19,6 +19,7 @@ export async function getAuthenticatedUser(request: NextRequest) {
     select: {
       id: true,
       email: true,
+      phone: true,
       name: true,
       role: true,
       educatorSlug: true,

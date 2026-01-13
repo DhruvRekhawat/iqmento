@@ -36,6 +36,7 @@ export async function GET(request: NextRequest) {
             id: true,
             name: true,
             email: true,
+            phone: true,
           },
         },
         educator: {
@@ -43,6 +44,7 @@ export async function GET(request: NextRequest) {
             id: true,
             name: true,
             email: true,
+            phone: true,
             educatorSlug: true,
           },
         },

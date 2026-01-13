@@ -9,15 +9,19 @@ type AuthState = {
 };
 
 type LoginInput = {
-  email: string;
-  password: string;
+  phone: string;
+  otp: string;
 };
 
 type RegisterInput = {
-  name: string;
-  email: string;
-  password: string;
+  phone: string;
+  otp: string;
+  name?: string;
   role: Exclude<UserRole, "ADMIN">;
+};
+
+type SendOtpInput = {
+  phone: string;
 };
 
 type AuthContextValue = {
@@ -26,6 +30,7 @@ type AuthContextValue = {
   isAuthenticated: boolean;
   isHydrated: boolean;
   isLoading: boolean;
+  sendOtp: (input: SendOtpInput) => Promise<{ error?: string }>;
   login: (input: LoginInput) => Promise<{ error?: string }>;
   register: (input: RegisterInput) => Promise<{ error?: string }>;
   logout: () => void;
@@ -114,13 +119,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  const sendOtp = React.useCallback(async (input: SendOtpInput): Promise<{ error?: string }> => {
+    setIsLoading(true);
+    try {
+      const response = await fetch("/api/auth/send-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone: input.phone }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setIsLoading(false);
+        return { error: data.error || "Failed to send OTP" };
+      }
+
+      setIsLoading(false);
+      return {};
+    } catch {
+      setIsLoading(false);
+      return { error: "Network error. Please try again." };
+    }
+  }, []);
+
   const login = React.useCallback(async (input: LoginInput): Promise<{ error?: string }> => {
     setIsLoading(true);
     try {
-      const response = await fetch("/api/auth/login", {
+      const response = await fetch("/api/auth/verify-otp-login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: input.email, password: input.password }),
+        body: JSON.stringify({ phone: input.phone, otp: input.otp }),
       });
 
       const data = await response.json();
@@ -142,12 +171,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const register = React.useCallback(async (input: RegisterInput): Promise<{ error?: string }> => {
     setIsLoading(true);
     try {
-      const response = await fetch("/api/auth/register", {
+      const response = await fetch("/api/auth/verify-otp-register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          email: input.email,
-          password: input.password,
+          phone: input.phone,
+          otp: input.otp,
           name: input.name,
           role: input.role,
         }),
@@ -188,11 +217,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       isAuthenticated: Boolean(state.user),
       isHydrated,
       isLoading,
+      sendOtp,
       login,
       register,
       logout,
     };
-  }, [state.user, isHydrated, isLoading, login, register, logout]);
+  }, [state.user, isHydrated, isLoading, sendOtp, login, register, logout]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

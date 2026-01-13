@@ -127,9 +127,13 @@ async function main() {
         }
       } else {
         // Create new educator user
+        // Generate a placeholder phone number (required field)
+        // Format: 9 + 9 random digits (valid Indian phone format)
+        const placeholderPhone = `9${Math.floor(100000000 + Math.random() * 900000000)}`;
         await prisma.user.create({
           data: {
             email,
+            phone: placeholderPhone, // Required field - placeholder for seed script
             name: alumnus.name,
             role: "EDUCATOR",
             passwordHash,

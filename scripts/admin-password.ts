@@ -76,16 +76,21 @@ async function main() {
         console.log(`✓ Updated user ${updated.email} to ADMIN and changed password`);
       } else {
         // Create new admin user
+        // Note: Phone is required, so we'll use a placeholder
+        // Admin users created via this script should update their phone later
         const passwordHash = await hashPassword(password);
+        const placeholderPhone = `admin-${Date.now()}`; // Temporary placeholder
         const user = await prisma.user.create({
           data: {
             email: normalizedEmail,
+            phone: placeholderPhone, // Required field - placeholder for admin script
             role: "ADMIN",
             passwordHash,
             name: email.split("@")[0],
           },
         });
         console.log(`✓ Created admin user: ${user.email}`);
+        console.log(`⚠ Warning: Phone number is a placeholder (${placeholderPhone}). Please update it via the admin panel.`);
       }
     } else if (command === "change") {
       // Change password for existing user

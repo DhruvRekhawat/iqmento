@@ -24,7 +24,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid email or password" }, { status: 401 });
     }
 
-    const token = generateToken(user.id, user.email, user.role);
+    // Use phone for token generation (phone is required, email is optional)
+    const token = generateToken(user.id, user.phone, user.role);
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { passwordHash, ...userWithoutPassword } = user;
