@@ -86,7 +86,7 @@ Add these to your `.env.local` file:
 
 ```env
 MSG91_AUTH_KEY=395515AXkDp29FHEDx69637a16P1
-MSG91_TEMPLATE_ID=69637ae8ac5de15414632582
+MSG91_TEMPLATE_ID=69097fb302737639286a2063
 ```
 
 ## Database Migration

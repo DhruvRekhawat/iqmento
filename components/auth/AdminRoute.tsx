@@ -14,7 +14,7 @@ export function AdminRoute({ children }: { children: React.ReactNode }) {
     if (!isHydrated) return;
     if (!isAuthenticated) {
       const next = pathname ? encodeURIComponent(pathname) : "";
-      router.replace(next ? `/login?next=${next}` : "/login");
+      router.replace(next ? `/admin/login?next=${next}` : "/admin/login");
       return;
     }
     if (role !== "ADMIN") {

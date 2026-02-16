@@ -13,6 +13,11 @@ type LoginInput = {
   otp: string;
 };
 
+type LoginWithEmailInput = {
+  email: string;
+  password: string;
+};
+
 type RegisterInput = {
   phone: string;
   otp: string;
@@ -32,6 +37,9 @@ type AuthContextValue = {
   isLoading: boolean;
   sendOtp: (input: SendOtpInput) => Promise<{ error?: string }>;
   login: (input: LoginInput) => Promise<{ error?: string }>;
+  loginWithEmail: (
+    input: LoginWithEmailInput
+  ) => Promise<{ error?: string; user?: User }>;
   register: (input: RegisterInput) => Promise<{ error?: string }>;
   logout: () => void;
 };
@@ -168,6 +176,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [persist]);
 
+  const loginWithEmail = React.useCallback(
+    async (
+      input: LoginWithEmailInput
+    ): Promise<{ error?: string; user?: User }> => {
+      setIsLoading(true);
+      try {
+        const response = await fetch("/api/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: input.email, password: input.password }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          setIsLoading(false);
+          return { error: data.error || "Invalid email or password" };
+        }
+
+        persist(data.user, data.token);
+        setIsLoading(false);
+        return { user: data.user };
+      } catch {
+        setIsLoading(false);
+        return { error: "Network error. Please try again." };
+      }
+    },
+    [persist]
+  );
+
   const register = React.useCallback(async (input: RegisterInput): Promise<{ error?: string }> => {
     setIsLoading(true);
     try {
@@ -219,10 +257,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       isLoading,
       sendOtp,
       login,
+      loginWithEmail,
       register,
       logout,
     };
-  }, [state.user, isHydrated, isLoading, sendOtp, login, register, logout]);
+  }, [state.user, isHydrated, isLoading, sendOtp, login, loginWithEmail, register, logout]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
