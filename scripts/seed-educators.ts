@@ -25,6 +25,8 @@ config({ path: envPathFallback });
 
 import { prisma } from "../lib/prisma";
 import { hashPassword } from "../lib/auth-utils";
+import * as fs from "fs";
+import * as path from "path";
 
 const slugify = (s: string) =>
   s
@@ -35,127 +37,134 @@ const slugify = (s: string) =>
     .replace(/-+/g, "-")
     .replace(/^-|-$/g, "");
 
-// Alumni data - same as in seed-remote.ts
-const alumniData = [
-  {
-    almuniId: "AL001",
-    name: "Rajesh Kumar",
-    headline: "Senior Product Designer at Google",
-    mail: "rajesh.kumar@example.com",
-  },
-  {
-    almuniId: "AL002",
-    name: "Priya Sharma",
-    headline: "UX Lead at Microsoft",
-    mail: "priya.sharma@example.com",
-  },
-  {
-    almuniId: "AL003",
-    name: "Amit Patel",
-    headline: "Software Engineer at Amazon",
-    mail: "amit.patel@example.com",
-  },
-  {
-    almuniId: "AL004",
-    name: "Sneha Reddy",
-    headline: "Product Manager at Flipkart",
-    mail: "sneha.reddy@example.com",
-  },
-  {
-    almuniId: "AL005",
-    name: "Vikram Singh",
-    headline: "Interaction Designer at Adobe",
-    mail: "vikram.singh@example.com",
-  },
-  {
-    almuniId: "AL006",
-    name: "Ananya Desai",
-    headline: "Data Scientist at Goldman Sachs",
-    mail: "ananya.desai@example.com",
-  },
-  {
-    almuniId: "AL007",
-    name: "Kavya Nair",
-    headline: "Graphic Designer at Razorfish",
-    mail: "kavya.nair@example.com",
-  },
-  {
-    almuniId: "AL008",
-    name: "Rohan Mehta",
-    headline: "Consultant at McKinsey",
-    mail: "rohan.mehta@example.com",
-  },
-];
-
 const TEMP_PASSWORD = "12345678";
 
+// Simple robust CSV parser that handles quoted fields with commas
+function parseCSV(content: string): string[][] {
+  const result: string[][] = [];
+  let row: string[] = [];
+  let current = "";
+  let inQuotes = false;
+
+  for (let i = 0; i < content.length; i++) {
+    const char = content[i];
+    const nextChar = content[i + 1];
+
+    if (char === '"' && inQuotes && nextChar === '"') {
+      current += '"';
+      i++;
+    } else if (char === '"') {
+      inQuotes = !inQuotes;
+    } else if (char === "," && !inQuotes) {
+      row.push(current.trim());
+      current = "";
+    } else if ((char === "\r" || char === "\n") && !inQuotes) {
+      if (current || row.length > 0) {
+        row.push(current.trim());
+        result.push(row);
+        current = "";
+        row = [];
+      }
+      if (char === "\r" && nextChar === "\n") i++;
+    } else {
+      current += char;
+    }
+  }
+
+  if (current || row.length > 0) {
+    row.push(current.trim());
+    result.push(row);
+  }
+
+  return result;
+}
+
 async function main() {
-  console.log("🌱 Starting educator user seeding...\n");
+  console.log("🌱 Starting educator user seeding from CSV...\n");
+
+  const csvPath = path.resolve(process.cwd(), "scripts", "Data - Sheet1.csv");
+  if (!fs.existsSync(csvPath)) {
+    console.error(`✗ CSV file not found at: ${csvPath}`);
+    process.exit(1);
+  }
+
+  const csvContent = fs.readFileSync(csvPath, "utf-8");
+  const rows = parseCSV(csvContent);
+  
+  // Remove header row
+  const dataRows = rows.slice(1);
 
   const passwordHash = await hashPassword(TEMP_PASSWORD);
   let created = 0;
   let updated = 0;
-  let skipped = 0;
+  let errors = 0;
 
-  for (const alumnus of alumniData) {
-    const slug = slugify(alumnus.name);
-    const email = `${slug}@iqmento.com`;
+  for (const row of dataRows) {
+    if (row.length < 5) continue; // Skip empty or invalid rows
+
+    const email = row[1]; // Email Address
+    const name = row[2];  // Enter your name
+    const rawPhone = row[3]; // Mobile Number
+    const college = row[6]; // College name
+    const gradYearStr = row[28]; // Which year did you pass out from college?
+    const linkedin = row[32]; // Your Linkedin ID
+
+    if (!email || !name) {
+      console.log(`⊘ Skipping row with missing email or name: ${name || "Unknown"}`);
+      continue;
+    }
+
+    // Sanitize phone: take first 10 digits
+    const phoneMatch = rawPhone?.match(/\d{10}/);
+    const phone = phoneMatch ? phoneMatch[0] : `9${Math.floor(100000000 + Math.random() * 900000000)}`;
+
+    // Parse graduation year
+    const gradYearMatch = gradYearStr?.match(/\d{4}/);
+    const kycGraduationYear = gradYearMatch ? parseInt(gradYearMatch[0], 10) : null;
+
+    const slug = slugify(name);
 
     try {
-      // Check if user already exists
-      const existingUser = await prisma.user.findUnique({
+      // Use upsert to be idempotent
+      await prisma.user.upsert({
         where: { email },
+        update: {
+          name,
+          phone,
+          role: "EDUCATOR",
+          educatorSlug: slug,
+          kycStatus: "APPROVED",
+          kycCollege: college,
+          kycGraduationYear,
+          kycLinkedin: linkedin,
+        },
+        create: {
+          email,
+          phone,
+          name,
+          role: "EDUCATOR",
+          passwordHash,
+          educatorSlug: slug,
+          kycStatus: "APPROVED",
+          kycCollege: college,
+          kycGraduationYear,
+          kycLinkedin: linkedin,
+        },
       });
 
-      if (existingUser) {
-        // Update existing user to ensure it's an educator with correct slug
-        if (existingUser.role !== "EDUCATOR" || existingUser.educatorSlug !== slug) {
-          await prisma.user.update({
-            where: { email },
-            data: {
-              role: "EDUCATOR",
-              educatorSlug: slug,
-              name: alumnus.name,
-              passwordHash, // Update password to temp password
-            },
-          });
-          console.log(`✓ Updated educator: ${alumnus.name} (${email})`);
-          updated++;
-        } else {
-          console.log(`⊘ Skipped (already exists): ${alumnus.name} (${email})`);
-          skipped++;
-        }
-      } else {
-        // Create new educator user
-        // Generate a placeholder phone number (required field)
-        // Format: 9 + 9 random digits (valid Indian phone format)
-        const placeholderPhone = `9${Math.floor(100000000 + Math.random() * 900000000)}`;
-        await prisma.user.create({
-          data: {
-            email,
-            phone: placeholderPhone, // Required field - placeholder for seed script
-            name: alumnus.name,
-            role: "EDUCATOR",
-            passwordHash,
-            educatorSlug: slug,
-          },
-        });
-        console.log(`✓ Created educator: ${alumnus.name} (${email})`);
-        created++;
-      }
+      console.log(`✓ Processed educator: ${name} (${email})`);
+      created++; // Counting as "processed" since upsert doesn't tell us if it was created or updated easily without a check
     } catch (error) {
-      console.error(`✗ Error processing ${alumnus.name}:`, error);
+      console.error(`✗ Error processing ${name} (${email}):`, error);
+      errors++;
     }
   }
 
   console.log("\n✅ Seeding completed!");
-  console.log(`   Created: ${created}`);
-  console.log(`   Updated: ${updated}`);
-  console.log(`   Skipped: ${skipped}`);
-  console.log(`   Total: ${alumniData.length}`);
-  console.log(`\n📧 All users have email format: <slug>@iqmento.com`);
+  console.log(`   Processed: ${created}`);
+  console.log(`   Errors: ${errors}`);
+  console.log(`   Total rows: ${dataRows.length}`);
   console.log(`🔑 Temporary password for all: ${TEMP_PASSWORD}`);
-  console.log(`\n⚠️  Remember to change passwords after first login!`);
 }
 
 main()

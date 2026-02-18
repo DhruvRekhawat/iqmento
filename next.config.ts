@@ -30,6 +30,16 @@ const nextConfig: NextConfig = {
   },
   // Exclude libsql packages from server-side bundling issues
   serverExternalPackages: ["@libsql/client", "@prisma/adapter-libsql"],
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "credible-sharing-b61c46eae9.media.strapiapp.com",
+        port: "",
+        pathname: "/**",
+      },
+    ],
+  },
 };
 
 export default nextConfig;
