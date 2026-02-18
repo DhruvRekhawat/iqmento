@@ -34,43 +34,58 @@ export const metadata: Metadata = {
 };
 
 export default async function AlumniDirectoryPage() {
-  const alumniResponse = await getAlumni({
-    populate: ["profile", "heroImage"],
-    filters: {
-      publishedAt: { $notNull: true },
-    },
-    pagination: {
-      pageSize: 100,
-    },
-  });
+  let alumniData: any[] = [];
+  let collegesData: any[] = [];
+  let testimonials: Testimonial[] = [];
 
-  // Get colleges data for search
-  const collegesResponse = await getColleges({
-    populate: ["heroImage"],
-    filters: {
-      publishedAt: { $notNull: true },
-    },
-    pagination: {
-      pageSize: 50,
-    },
-  });
-
-  // Extract testimonials from alumni reviews
-  let testimonials: Testimonial[];
   try {
-    testimonials = extractTestimonialsFromAlumni(alumniResponse.data);
+    const [alumniResponse, collegesResponse] = await Promise.all([
+      getAlumni({
+        populate: ["profile", "heroImage"],
+        filters: {
+          publishedAt: { $notNull: true },
+        },
+        pagination: {
+          pageSize: 100,
+        },
+      }).catch(err => {
+        console.error("Error fetching alumni in directory:", err);
+        return { data: [], meta: {} };
+      }),
+      getColleges({
+        populate: ["heroImage"],
+        filters: {
+          publishedAt: { $notNull: true },
+        },
+        pagination: {
+          pageSize: 50,
+        },
+      }).catch(err => {
+        console.error("Error fetching colleges in alumni directory:", err);
+        return { data: [], meta: {} };
+      })
+    ]);
+
+    alumniData = alumniResponse.data || [];
+    collegesData = collegesResponse.data || [];
+
+    // Extract testimonials from alumni reviews
+    try {
+      testimonials = extractTestimonialsFromAlumni(alumniData);
+    } catch (error) {
+      console.error("Error extracting testimonials:", error);
+    }
   } catch (error) {
-    console.error("Error extracting testimonials:", error);
-    testimonials = [];
+    console.error("Critical error in AlumniDirectoryPage:", error);
   }
 
   return (
     <>
       <Navigation />
       <main className="bg-surface">
-        <AlumniDirectoryHero alumni={alumniResponse.data} colleges={collegesResponse.data} />
-        <FeaturedMentorsSection alumni={alumniResponse.data} />
-        <AllAlumniGrid alumni={alumniResponse.data} />
+        <AlumniDirectoryHero alumni={alumniData} colleges={collegesData} />
+        <FeaturedMentorsSection alumni={alumniData} />
+        <AllAlumniGrid alumni={alumniData} />
         <AlumniValuePropsSection />
         <Testimonials testimonials={testimonials} />
         <CallToAction />

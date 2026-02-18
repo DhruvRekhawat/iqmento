@@ -34,64 +34,79 @@ export const metadata: Metadata = {
 };
 
 export default async function AllCollegesPage() {
-  const collegesResponse = await getColleges({
-    populate: ["heroImage"],
-    filters: {
-      publishedAt: { $notNull: true },
-    },
-    pagination: {
-      pageSize: 100,
-    },
-  });
+  let collegesData: any[] = [];
+  let alumniForSearch: any[] = [];
+  let testimonials: Testimonial[] = [];
 
-  // Get alumni data for search
-  const alumniResponse = await getAlumni({
-    populate: ["profile"],
-    filters: {
-      publishedAt: { $notNull: true },
-    },
-    pagination: {
-      pageSize: 50,
-    },
-  });
-
-  // Transform alumni data for search (ensure slug is always a string)
-  const alumniForSearch = alumniResponse.data.map((alum) => {
-    const profile = mapStrapiAlumniToAlumniProfile(alum);
-    return {
-      slug: profile.slug,
-      name: profile.name,
-      location: profile.location,
-      headline: profile.headline,
-      image: profile.image,
-    };
-  });
-
-  // Fetch testimonials from alumni reviews
-  let testimonials: Testimonial[];
   try {
-    const testimonialsResponse = await getAlumni({
-      populate: "*",
-      filters: {
-        publishedAt: { $notNull: true },
-      },
-      pagination: {
-        pageSize: 100,
-      },
+    const [collegesResponse, alumniResponse] = await Promise.all([
+      getColleges({
+        populate: ["heroImage"],
+        filters: {
+          publishedAt: { $notNull: true },
+        },
+        pagination: {
+          pageSize: 100,
+        },
+      }).catch(err => {
+        console.error("Error fetching colleges:", err);
+        return { data: [], meta: {} };
+      }),
+      getAlumni({
+        populate: ["profile"],
+        filters: {
+          publishedAt: { $notNull: true },
+        },
+        pagination: {
+          pageSize: 50,
+        },
+      }).catch(err => {
+        console.error("Error fetching alumni for college search:", err);
+        return { data: [], meta: {} };
+      })
+    ]);
+
+    collegesData = collegesResponse.data || [];
+    
+    // Transform alumni data for search (ensure slug is always a string)
+    alumniForSearch = (alumniResponse.data || []).map((alum: any) => {
+      const profile = mapStrapiAlumniToAlumniProfile(alum);
+      return {
+        slug: profile.slug,
+        name: profile.name,
+        location: profile.location,
+        headline: profile.headline,
+        image: profile.image,
+      };
     });
-    testimonials = extractTestimonialsFromAlumni(testimonialsResponse.data);
+
+    // Fetch testimonials from alumni reviews
+    try {
+      const testimonialsResponse = await getAlumni({
+        populate: "*",
+        filters: {
+          publishedAt: { $notNull: true },
+        },
+        pagination: {
+          pageSize: 100,
+        },
+      }).catch(() => ({ data: [], meta: {} }));
+      
+      testimonials = extractTestimonialsFromAlumni(testimonialsResponse.data || []);
+    } catch (error) {
+      console.error("Error fetching testimonials:", error);
+    }
   } catch (error) {
-    console.error("Error fetching testimonials:", error);
-    testimonials = [];
+    console.error("Critical error in AllCollegesPage:", error);
   }
 
   return (
     <>
       <Navigation />
       <main className="bg-surface">
-        <CollegesHero colleges={collegesResponse.data} alumni={alumniForSearch} />
-        <CollegesExplorer colleges={collegesResponse.data} />
-        <FeaturedColleges colleges={collegesResponse.data} />
+        <CollegesHero colleges={collegesData} alumni={alumniForSearch} />
+        <CollegesExplorer colleges={collegesData} />
+        <FeaturedColleges colleges={collegesData} />
         <Testimonials testimonials={testimonials} />
         <CallToAction />
       </main>
