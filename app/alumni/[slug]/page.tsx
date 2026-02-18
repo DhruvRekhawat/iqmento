@@ -37,6 +37,11 @@ export async function generateStaticParams() {
       },
     });
 
+    if (!alumniResponse || !alumniResponse.data) {
+      console.warn("No alumni data returned from Strapi for static params");
+      return [];
+    }
+
     return alumniResponse.data
       .map((alumni) => {
         const slug =
@@ -49,6 +54,7 @@ export async function generateStaticParams() {
       .filter((item): item is { slug: string } => item !== null);
   } catch (error) {
     console.error("Error generating static params for alumni:", error);
+    // Return empty array to allow build to continue, pages will be generated on-demand if not static
     return [];
   }
 }

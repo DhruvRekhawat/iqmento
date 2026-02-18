@@ -184,20 +184,49 @@ async function fetchStrapi<T>(
     headers.Authorization = `Bearer ${STRAPI_API_TOKEN}`;
   }
 
-  const response = await fetch(url, {
-    method: "GET",
-    headers,
-    next: { revalidate: 60 }, // Cache for 60 seconds
-  });
+  // Retry logic for 503 errors
+  let lastError: Error | null = null;
+  const maxRetries = 3;
+  const baseDelay = 1000; // 1 second
 
-  if (!response.ok) {
-    const errorText = await response.text().catch(() => 'Unable to read error response');
-    throw new Error(
-      `Strapi API error: ${response.status} ${response.statusText}. URL: ${url}. Error: ${errorText}`
-    );
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      if (attempt > 0) {
+        const delay = baseDelay * Math.pow(2, attempt - 1);
+        console.log(`Retrying Strapi request (attempt ${attempt}/${maxRetries}) after ${delay}ms...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+
+      const response = await fetch(url, {
+        method: "GET",
+        headers,
+        next: { revalidate: 60 }, // Cache for 60 seconds
+      });
+
+      if (!response.ok) {
+        // If it's a 503 error, we might want to retry
+        if (response.status === 503 && attempt < maxRetries) {
+          console.warn(`Strapi 503 Service Unavailable for URL: ${url}. Retrying...`);
+          continue;
+        }
+
+        const errorText = await response.text().catch(() => 'Unable to read error response');
+        throw new Error(
+          `Strapi API error: ${response.status} ${response.statusText}. URL: ${url}. Error: ${errorText}`
+        );
+      }
+
+      return response.json();
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error(String(error));
+      if (attempt === maxRetries) break;
+      
+      // For network errors, also retry
+      console.warn(`Strapi request failed: ${lastError.message}. Retrying...`);
+    }
   }
 
-  return response.json();
+  throw lastError || new Error(`Failed to fetch from Strapi after ${maxRetries} retries`);
 }
 
 /**

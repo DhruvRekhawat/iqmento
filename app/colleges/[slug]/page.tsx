@@ -36,6 +36,11 @@ export async function generateStaticParams() {
       },
     });
 
+    if (!collegesResponse || !collegesResponse.data) {
+      console.warn("No colleges data returned from Strapi for static params");
+      return [];
+    }
+
     return collegesResponse.data
       .map((college) => {
         const slug = college.slug;
@@ -44,6 +49,7 @@ export async function generateStaticParams() {
       .filter((item): item is { slug: string } => item !== null);
   } catch (error) {
     console.error("Error generating static params for colleges:", error);
+    // Return empty array to allow build to continue, pages will be generated on-demand if not static
     return [];
   }
 }
