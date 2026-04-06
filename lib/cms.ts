@@ -52,7 +52,16 @@ function mapDbCollegeToProfile(c: DbCollege & { alumni?: DbAlumni[] }): CollegeP
     shortName: c.shortName || undefined,
     location: c.location,
     heroImage: c.heroImageUrl || "/colleges/hero.png",
-    hero: parseJson<CollegeHeroContent>(c.hero, defaultHero),
+    hero: (() => {
+      const parsed = parseJson<CollegeHeroContent>(c.hero, defaultHero);
+      return {
+        ...defaultHero,
+        ...parsed,
+        badges: parsed.badges ?? defaultHero.badges,
+        primaryAction: parsed.primaryAction ?? defaultHero.primaryAction,
+        secondaryAction: parsed.secondaryAction ?? defaultHero.secondaryAction,
+      };
+    })(),
     about: parseJson<string[]>(c.about, []),
     courses: parseJson<CourseDetail[]>(c.courses, []),
     admission: parseJson<{ title: string; subtitle: string; steps: AdmissionStep[] }>(

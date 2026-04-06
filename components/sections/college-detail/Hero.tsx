@@ -53,26 +53,30 @@ export function CollegeHero({ profile }: CollegeHeroProps) {
             </div>
 
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-              <Button
-                asChild
-                variant="accent"
-                size="lg"
-                className="h-[52px] min-w-[160px] rounded-full px-10 text-sm font-semibold shadow-[0_28px_55px_rgba(79,57,246,0.35)]"
-              >
-                <a href={hero.primaryAction.href} target="_blank" rel="noopener noreferrer">
-                  {hero.primaryAction.label}
-                </a>
-              </Button>
-              <Button
-                asChild
-                variant="outline"
-                size="lg"
-                className="h-[52px] min-w-[160px] rounded-full border-[#d9dcf0] bg-white px-10 text-sm font-semibold text-[#1a1d2b] shadow-[0_20px_40px_rgba(15,18,40,0.08)] hover:border-[#bfc3da]"
-              >
-                <a href={hero.secondaryAction.href} target="_blank" rel="noopener noreferrer">
-                  {hero.secondaryAction.label}
-                </a>
-              </Button>
+              {hero.primaryAction?.href && (
+                <Button
+                  asChild
+                  variant="accent"
+                  size="lg"
+                  className="h-[52px] min-w-[160px] rounded-full px-10 text-sm font-semibold shadow-[0_28px_55px_rgba(79,57,246,0.35)]"
+                >
+                  <a href={hero.primaryAction.href} target="_blank" rel="noopener noreferrer">
+                    {hero.primaryAction.label}
+                  </a>
+                </Button>
+              )}
+              {hero.secondaryAction?.href && (
+                <Button
+                  asChild
+                  variant="outline"
+                  size="lg"
+                  className="h-[52px] min-w-[160px] rounded-full border-[#d9dcf0] bg-white px-10 text-sm font-semibold text-[#1a1d2b] shadow-[0_20px_40px_rgba(15,18,40,0.08)] hover:border-[#bfc3da]"
+                >
+                  <a href={hero.secondaryAction.href} target="_blank" rel="noopener noreferrer">
+                    {hero.secondaryAction.label}
+                  </a>
+                </Button>
+              )}
             </div>
           </div>
 
