@@ -323,6 +323,11 @@ export function CollegeForm({
     initialData?.rating != null ? String(initialData.rating) : ""
   );
 
+  // About
+  const [about, setAbout] = React.useState<string[]>(
+    initialData?.about ?? []
+  );
+
   // Hero
   const [heroTagline, setHeroTagline] = React.useState(
     initialData?.hero?.tagline ?? ""
@@ -452,6 +457,7 @@ export function CollegeForm({
             ? { label: secondaryActionLabel, href: secondaryActionHref }
             : undefined,
       },
+      about: about.filter(Boolean),
       courses: recordsToCourses(courses).filter((c) => c.name),
       admission: {
         title: admissionTitle || undefined,
@@ -572,6 +578,15 @@ export function CollegeForm({
             value={heroImageUrl}
             onChange={setHeroImageUrl}
             folder="colleges"
+          />
+        </div>
+        <div className="mt-5">
+          <StringList
+            label="About / Overview Paragraphs"
+            values={about}
+            onChange={setAbout}
+            placeholder="Overview paragraph..."
+            multiline
           />
         </div>
       </div>
