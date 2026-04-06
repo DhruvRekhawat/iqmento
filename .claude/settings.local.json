@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npx turso:*)"
+      "Bash(npx turso:*)",
+      "Bash(npx tsc:*)"
     ]
   }
 }

@@ -217,11 +217,16 @@ export async function getColleges(options?: {
 export async function getCollegeBySlug(slug: string): Promise<CollegeProfile | null> {
   const college = await prisma.college.findFirst({
     where: { slug, published: true },
-    include: { alumni: { where: { published: true } } },
+    include: { alumni: true },
   });
 
   if (!college) return null;
-  return mapDbCollegeToProfile(college);
+  // Filter published alumni in application code (LibSQL adapter doesn't support nested where in include)
+  const filteredCollege = {
+    ...college,
+    alumni: college.alumni.filter((a) => a.published),
+  };
+  return mapDbCollegeToProfile(filteredCollege);
 }
 
 export async function getAlumni(options?: {
@@ -250,7 +255,12 @@ export async function getAlumni(options?: {
     where.isBookable = options.filters.isBookable;
   }
   if (options?.filters?.collegeSlug) {
-    where.college = { slug: options.filters.collegeSlug };
+    // Resolve college slug to ID (LibSQL adapter doesn't support nested relation filters)
+    const college = await prisma.college.findFirst({
+      where: { slug: options.filters.collegeSlug },
+      select: { id: true },
+    });
+    where.collegeId = college?.id ?? "___none___";
   }
   if (options?.filters?.search) {
     const search = options.filters.search;
