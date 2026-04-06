@@ -3,11 +3,10 @@ import Image from "next/image";
 
 import { Section } from "@/components/shared/section";
 import { SearchBar } from "@/components/shared/search-bar";
-import type { StrapiCollege } from "@/types/college";
-import { mapStrapiCollegeToCollegeProfile } from "@/lib/strapi-mappers";
+import type { CollegeProfile } from "@/data/college-profiles";
 
 interface CollegesHeroProps {
-  colleges?: StrapiCollege[];
+  colleges?: CollegeProfile[];
   alumni?: Array<{
     slug: string;
     name: string;
@@ -19,15 +18,12 @@ interface CollegesHeroProps {
 
 export function CollegesHero({ colleges = [], alumni = [] }: CollegesHeroProps) {
   // Transform colleges data for search
-  const collegesForSearch = colleges.map((college) => {
-    const profile = mapStrapiCollegeToCollegeProfile(college);
-    return {
-      slug: profile.slug,
-      name: profile.name,
-      location: profile.location,
-      heroImage: profile.heroImage,
-    };
-  });
+  const collegesForSearch = colleges.map((college) => ({
+    slug: college.slug,
+    name: college.name,
+    location: college.location,
+    heroImage: college.heroImage,
+  }));
 
   return (
     <Section

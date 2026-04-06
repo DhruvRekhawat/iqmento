@@ -2,38 +2,31 @@ import Image from "next/image";
 
 import { Section } from "@/components/shared/section";
 import { SearchBar } from "@/components/shared/search-bar";
-import type { StrapiAlumni } from "@/types/alumni";
-import type { StrapiCollege } from "@/types/college";
-import { mapStrapiAlumniToAlumniProfile, mapStrapiCollegeToCollegeProfile } from "@/lib/strapi-mappers";
+import type { AlumniProfile } from "@/data/alumni-profiles";
+import type { CollegeProfile } from "@/data/college-profiles";
 
 interface AlumniDirectoryHeroProps {
-  alumni?: StrapiAlumni[];
-  colleges?: StrapiCollege[];
+  alumni?: AlumniProfile[];
+  colleges?: CollegeProfile[];
 }
 
 export function AlumniDirectoryHero({ alumni = [], colleges = [] }: AlumniDirectoryHeroProps) {
   // Transform alumni data for search
-  const alumniForSearch = alumni.map((alum) => {
-    const profile = mapStrapiAlumniToAlumniProfile(alum);
-    return {
-      slug: profile.slug || "",
-      name: profile.name || "",
-      location: profile.location || "",
-      headline: profile.headline || "",
-      image: profile.image || "",
-    };
-  });
+  const alumniForSearch = alumni.map((profile) => ({
+    slug: profile.slug || "",
+    name: profile.name || "",
+    location: profile.location || "",
+    headline: profile.headline || "",
+    image: profile.image || "",
+  }));
 
   // Transform colleges data for search
-  const collegesForSearch = colleges.map((college) => {
-    const profile = mapStrapiCollegeToCollegeProfile(college);
-    return {
-      slug: profile.slug || "",
-      name: profile.name || "",
-      location: profile.location || "",
-      heroImage: profile.heroImage || null,
-    };
-  });
+  const collegesForSearch = colleges.map((profile) => ({
+    slug: profile.slug || "",
+    name: profile.name || "",
+    location: profile.location || "",
+    heroImage: profile.heroImage || null,
+  }));
 
   return (
     <Section id="alumni-directory-hero" variant="hero" spacing="loose" bleed className="h-fit">

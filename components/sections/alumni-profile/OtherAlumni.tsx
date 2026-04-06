@@ -2,17 +2,15 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { Container } from "@/components/shared/container";
-import type { StrapiAlumni } from "@/types/alumni";
-import { mapStrapiAlumniToAlumniProfile } from "@/lib/strapi-mappers";
+import type { AlumniProfile } from "@/data/alumni-profiles";
 
 interface OtherAlumniSectionProps {
   currentSlug: string;
-  otherAlumni?: StrapiAlumni[];
+  otherAlumni?: AlumniProfile[];
 }
 
 export function OtherAlumniSection({ currentSlug, otherAlumni = [] }: OtherAlumniSectionProps) {
   const others = otherAlumni
-    .map(alum => mapStrapiAlumniToAlumniProfile(alum))
     .filter((profile) => profile.slug !== currentSlug)
     .slice(0, 5);
 

@@ -1,15 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { STRAPI_API_URL, STRAPI_API_TOKEN } from "@/lib/strapi";
+import { uploadImage, uploadFile } from "@/lib/cloudinary";
 
 export async function POST(request: NextRequest) {
   try {
-    if (!STRAPI_API_URL) {
-      return NextResponse.json(
-        { error: "Strapi API URL is not configured" },
-        { status: 500 }
-      );
-    }
-
     const formData = await request.formData();
     const file = formData.get("file") as File | null;
 
@@ -17,14 +10,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
     }
 
-    // Validate file type (PDF, images)
-    const allowedTypes = [
-      "application/pdf",
-      "image/jpeg",
-      "image/jpg",
-      "image/png",
-      "image/webp",
-    ];
+    // Validate file type
+    const imageTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+    const allowedTypes = [...imageTypes, "application/pdf"];
     if (!allowedTypes.includes(file.type)) {
       return NextResponse.json(
         { error: "Invalid file type. Only PDF and images are allowed." },
@@ -33,7 +21,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate file size (max 10MB)
-    const maxSize = 10 * 1024 * 1024; // 10MB
+    const maxSize = 10 * 1024 * 1024;
     if (file.size > maxSize) {
       return NextResponse.json(
         { error: "File size exceeds 10MB limit" },
@@ -41,59 +29,30 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create FormData for Strapi
-    const strapiFormData = new FormData();
-    strapiFormData.append("files", file);
+    const buffer = Buffer.from(await file.arrayBuffer());
+    const folder = (formData.get("folder") as string) || "iqmento";
 
-    // Upload to Strapi
-    const uploadUrl = `${STRAPI_API_URL}/api/upload`;
-    const headers: HeadersInit = {};
-    
-    if (STRAPI_API_TOKEN) {
-      headers.Authorization = `Bearer ${STRAPI_API_TOKEN}`;
+    if (imageTypes.includes(file.type)) {
+      const result = await uploadImage(buffer, file.name, folder);
+      return NextResponse.json({
+        url: result.url,
+        publicId: result.publicId,
+        width: result.width,
+        height: result.height,
+        name: file.name,
+        mime: file.type,
+        size: file.size,
+      });
+    } else {
+      const result = await uploadFile(buffer, file.name, folder);
+      return NextResponse.json({
+        url: result.url,
+        publicId: result.publicId,
+        name: file.name,
+        mime: file.type,
+        size: file.size,
+      });
     }
-    // Don't set Content-Type - let fetch set it automatically with boundary for FormData
-
-    const response = await fetch(uploadUrl, {
-      method: "POST",
-      headers,
-      body: strapiFormData,
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text().catch(() => "Unknown error");
-      console.error("Strapi upload error:", errorText);
-      return NextResponse.json(
-        { error: "Failed to upload file to Strapi" },
-        { status: response.status }
-      );
-    }
-
-    const data = await response.json();
-    
-    // Strapi returns an array of file objects
-    if (!data || !Array.isArray(data) || data.length === 0) {
-      return NextResponse.json(
-        { error: "Invalid response from Strapi" },
-        { status: 500 }
-      );
-    }
-
-    const uploadedFile = data[0];
-    
-    // Return the file URL
-    // Strapi file objects have a `url` property
-    const fileUrl = uploadedFile.url?.startsWith("http")
-      ? uploadedFile.url
-      : `${STRAPI_API_URL}${uploadedFile.url}`;
-
-    return NextResponse.json({
-      url: fileUrl,
-      id: uploadedFile.id,
-      name: uploadedFile.name,
-      mime: uploadedFile.mime,
-      size: uploadedFile.size,
-    });
   } catch (error) {
     console.error("Error uploading file:", error);
     return NextResponse.json(
@@ -102,4 +61,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-

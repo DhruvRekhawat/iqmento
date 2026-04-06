@@ -10,8 +10,7 @@ import {
   CollegesHero,
   FeaturedColleges,
 } from "@/components/sections/colleges";
-import { getColleges, getAlumni } from "@/lib/strapi";
-import { mapStrapiAlumniToAlumniProfile } from "@/lib/strapi-mappers";
+import { getColleges, getAlumni } from "@/lib/cms";
 import { extractTestimonialsFromAlumni } from "@/lib/testimonials-utils";
 
 export const metadata: Metadata = {
@@ -34,67 +33,36 @@ export const metadata: Metadata = {
 };
 
 export default async function AllCollegesPage() {
-  let collegesData: any[] = [];
-  let alumniForSearch: any[] = [];
+  let collegesData: Awaited<ReturnType<typeof getColleges>>["data"] = [];
+  let alumniForSearch: { slug: string; name: string; location: string; headline: string; image: string }[] = [];
   let testimonials: Testimonial[] = [];
 
   try {
     const [collegesResponse, alumniResponse] = await Promise.all([
-      getColleges({
-        populate: ["heroImage"],
-        filters: {
-          publishedAt: { $notNull: true },
-        },
-        pagination: {
-          pageSize: 100,
-        },
-      }).catch(err => {
+      getColleges({ pagination: { pageSize: 100 } }).catch((err) => {
         console.error("Error fetching colleges:", err);
-        return { data: [], meta: {} };
+        return { data: [] as Awaited<ReturnType<typeof getColleges>>["data"], meta: { total: 0, page: 1, pageSize: 100 } };
       }),
-      getAlumni({
-        populate: ["profile"],
-        filters: {
-          publishedAt: { $notNull: true },
-        },
-        pagination: {
-          pageSize: 50,
-        },
-      }).catch(err => {
-        console.error("Error fetching alumni for college search:", err);
-        return { data: [], meta: {} };
-      })
+      getAlumni({ pagination: { pageSize: 50 } }).catch((err) => {
+        console.error("Error fetching alumni:", err);
+        return { data: [] as Awaited<ReturnType<typeof getAlumni>>["data"], meta: { total: 0, page: 1, pageSize: 50 } };
+      }),
     ]);
 
-    collegesData = collegesResponse.data || [];
-    
-    // Transform alumni data for search (ensure slug is always a string)
-    alumniForSearch = (alumniResponse.data || []).map((alum: any) => {
-      const profile = mapStrapiAlumniToAlumniProfile(alum);
-      return {
-        slug: profile.slug,
-        name: profile.name,
-        location: profile.location,
-        headline: profile.headline,
-        image: profile.image,
-      };
-    });
+    collegesData = collegesResponse.data;
 
-    // Fetch testimonials from alumni reviews
+    alumniForSearch = alumniResponse.data.map((alum) => ({
+      slug: alum.slug,
+      name: alum.name,
+      location: alum.location,
+      headline: alum.headline,
+      image: alum.image,
+    }));
+
     try {
-      const testimonialsResponse = await getAlumni({
-        populate: "*",
-        filters: {
-          publishedAt: { $notNull: true },
-        },
-        pagination: {
-          pageSize: 100,
-        },
-      }).catch(() => ({ data: [], meta: {} }));
-      
-      testimonials = extractTestimonialsFromAlumni(testimonialsResponse.data || []);
+      testimonials = extractTestimonialsFromAlumni(alumniResponse.data);
     } catch (error) {
-      console.error("Error fetching testimonials:", error);
+      console.error("Error extracting testimonials:", error);
     }
   } catch (error) {
     console.error("Critical error in AllCollegesPage:", error);
@@ -114,4 +82,3 @@ export default async function AllCollegesPage() {
     </>
   );
 }
-

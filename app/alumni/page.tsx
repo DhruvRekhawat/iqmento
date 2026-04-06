@@ -11,7 +11,7 @@ import { Testimonials } from "@/components/sections/testimonials";
 import type { Testimonial } from "@/components/sections/testimonials/Testimonials";
 import { CallToAction } from "@/components/sections/cta";
 import { Footer } from "@/components/sections/footer";
-import { getAlumni, getColleges } from "@/lib/strapi";
+import { getAlumni, getColleges } from "@/lib/cms";
 import { extractTestimonialsFromAlumni } from "@/lib/testimonials-utils";
 
 export const metadata: Metadata = {
@@ -34,42 +34,25 @@ export const metadata: Metadata = {
 };
 
 export default async function AlumniDirectoryPage() {
-  let alumniData: any[] = [];
-  let collegesData: any[] = [];
+  let alumniData: Awaited<ReturnType<typeof getAlumni>>["data"] = [];
+  let collegesData: Awaited<ReturnType<typeof getColleges>>["data"] = [];
   let testimonials: Testimonial[] = [];
 
   try {
     const [alumniResponse, collegesResponse] = await Promise.all([
-      getAlumni({
-        populate: ["profile", "heroImage"],
-        filters: {
-          publishedAt: { $notNull: true },
-        },
-        pagination: {
-          pageSize: 100,
-        },
-      }).catch(err => {
-        console.error("Error fetching alumni in directory:", err);
-        return { data: [], meta: {} };
+      getAlumni({ pagination: { pageSize: 100 } }).catch((err) => {
+        console.error("Error fetching alumni:", err);
+        return { data: [] as Awaited<ReturnType<typeof getAlumni>>["data"], meta: { total: 0, page: 1, pageSize: 100 } };
       }),
-      getColleges({
-        populate: ["heroImage"],
-        filters: {
-          publishedAt: { $notNull: true },
-        },
-        pagination: {
-          pageSize: 50,
-        },
-      }).catch(err => {
-        console.error("Error fetching colleges in alumni directory:", err);
-        return { data: [], meta: {} };
-      })
+      getColleges({ pagination: { pageSize: 50 } }).catch((err) => {
+        console.error("Error fetching colleges:", err);
+        return { data: [] as Awaited<ReturnType<typeof getColleges>>["data"], meta: { total: 0, page: 1, pageSize: 50 } };
+      }),
     ]);
 
-    alumniData = alumniResponse.data || [];
-    collegesData = collegesResponse.data || [];
+    alumniData = alumniResponse.data;
+    collegesData = collegesResponse.data;
 
-    // Extract testimonials from alumni reviews
     try {
       testimonials = extractTestimonialsFromAlumni(alumniData);
     } catch (error) {
@@ -94,5 +77,3 @@ export default async function AlumniDirectoryPage() {
     </>
   );
 }
-
-

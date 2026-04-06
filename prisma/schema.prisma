@@ -23,7 +23,7 @@ model User {
   kycCollege        String?
   kycGraduationYear Int?
   kycLinkedin       String?
-  kycDocumentUrl    String? // URL to document stored in Strapi
+  kycDocumentUrl    String? // Cloudinary URL
 
   // Relations
   bookingsAsStudent Booking[] @relation("StudentBookings")
@@ -147,4 +147,78 @@ model Otp {
 
   @@index([phone])
   @@index([expiresAt])
+}
+
+model College {
+  id              String   @id @default(cuid())
+  slug            String   @unique
+  name            String
+  shortName       String?
+  location        String
+  heroImageUrl    String?
+  hero            String?  // JSON: {tagline, description, badges[], primaryAction, secondaryAction}
+  about           String?  // JSON: string[]
+  courses         String?  // JSON: CourseDetail[]
+  admission       String?  // JSON: {title, subtitle, steps[]}
+  recruiters      String?  // JSON: {title, logos[], cutoff[], placements[]}
+  reviews         String?  // JSON: ReviewDetail[]
+  faqs            String?  // JSON: FaqDetail[]
+  collegeType     String?  // "IIT"|"NIT"|"IIM"|"NID"|"Medical"|"Law"|etc.
+  collegeTier     String?  // "Tier 1"|"Tier 2"|"Tier 3"
+  rating          Float?
+  metaTitle       String?
+  metaDescription String?
+  published       Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  alumni          Alumni[]
+
+  @@index([slug])
+  @@index([published])
+  @@index([collegeType])
+}
+
+model Alumni {
+  id              String   @id @default(cuid())
+  slug            String   @unique
+  name            String
+  headline        String?
+  bio             String?
+  course          String?
+  graduationYear  Int?
+  currentCompany  String?
+  currentJobRole  String?
+  jobLocation     String?
+  location        String?
+  mobileNumber    String?
+  mail            String?
+  profileImageUrl String?
+  heroImageUrl    String?
+  isBookable      Boolean  @default(false)
+  isFeatured      Boolean  @default(false)
+  heroTagline     String?
+  heroSummary     String?  // JSON: string[]
+  overview        String?  // JSON: string[]
+  availability    String?
+  stats           String?  // JSON: {label, value}[]
+  focusAreas      String?  // JSON: {title, description}[]
+  sessions        String?  // JSON: SessionOffering[]
+  highlights      String?  // JSON: string[]
+  resources       String?  // JSON: {label, href}[]
+  reviews         String?  // JSON: AlumniReview[]
+  featuredQuote   String?
+  bookingUrl      String?
+  questionUrl     String?
+  published       Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  collegeId       String?
+  college         College?  @relation(fields: [collegeId], references: [id])
+
+  @@index([slug])
+  @@index([collegeId])
+  @@index([published])
+  @@index([isFeatured])
 }

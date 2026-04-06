@@ -2,11 +2,10 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { Container } from "@/components/shared/container";
-import type { StrapiAlumni } from "@/types/alumni";
-import { mapStrapiAlumniToAlumniProfile } from "@/lib/strapi-mappers";
+import type { AlumniProfile } from "@/data/alumni-profiles";
 
 interface AllAlumniGridProps {
-  alumni: StrapiAlumni[];
+  alumni: AlumniProfile[];
 }
 
 export function AllAlumniGrid({ alumni }: AllAlumniGridProps) {
@@ -14,7 +13,7 @@ export function AllAlumniGrid({ alumni }: AllAlumniGridProps) {
     return null;
   }
 
-  const profiles = alumni.map((alum) => mapStrapiAlumniToAlumniProfile(alum));
+  const profiles = alumni;
 
   return (
     <section className="bg-white py-24 sm:py-32">

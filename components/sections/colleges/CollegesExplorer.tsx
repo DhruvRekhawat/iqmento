@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useMemo, useRef, useEffect } from "react";
@@ -7,8 +8,13 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { Section } from "@/components/shared/section";
-import type { StrapiCollege } from "@/types/college";
-import { mapStrapiCollegeToCollegeProfile } from "@/lib/strapi-mappers";
+import type { CollegeProfile } from "@/data/college-profiles";
+
+type CollegeWithMeta = CollegeProfile & {
+  collegeType?: string | null;
+  collegeTier?: string | null;
+  rating?: number | null;
+};
 
 const COLLEGE_TYPES = [
   "IIT",
@@ -42,7 +48,7 @@ interface FilterState {
 }
 
 interface CollegesExplorerProps {
-  colleges: StrapiCollege[];
+  colleges: CollegeWithMeta[];
 }
 
 export function CollegesExplorer({ colleges }: CollegesExplorerProps) {
@@ -70,32 +76,22 @@ export function CollegesExplorer({ colleges }: CollegesExplorerProps) {
   // Filter colleges based on active filters
   const filteredColleges = useMemo(() => {
     return colleges.filter((college) => {
-      const profile = mapStrapiCollegeToCollegeProfile(college);
-
-      // Filter by college type
       if (filters.collegeType && college.collegeType !== filters.collegeType) {
         return false;
       }
-
-      // Filter by college tier
       if (filters.collegeTier && college.collegeTier !== filters.collegeTier) {
         return false;
       }
-
-      // Filter by rating
       if (filters.minRating !== null && (college.rating || 0) < filters.minRating) {
         return false;
       }
-
-      // Filter by location
       if (filters.location) {
-        const collegeCity = profile.location.split(",")[0]?.trim().toLowerCase();
+        const collegeCity = college.location.split(",")[0]?.trim().toLowerCase();
         const filterCity = filters.location.toLowerCase();
         if (collegeCity !== filterCity) {
           return false;
         }
       }
-
       return true;
     });
   }, [colleges, filters]);
@@ -103,21 +99,19 @@ export function CollegesExplorer({ colleges }: CollegesExplorerProps) {
   // Generate college cards from filtered colleges
   const collegeCards = useMemo(() => {
     return filteredColleges.map((college) => {
-      const profile = mapStrapiCollegeToCollegeProfile(college);
-      const programNames = profile.courses.map((course) => course.name);
-
+      const programNames = college.courses.map((course) => course.name);
       return {
-        slug: profile.slug,
-        name: profile.name,
-        location: profile.location,
+        slug: college.slug,
+        name: college.name,
+        location: college.location,
         programs:
           programNames.length > 0
             ? programNames.slice(0, 3).join(", ")
             : "Programs information coming soon",
-        mentors: profile.alumni.length,
-        reviews: profile.reviews.length,
-        description: profile.hero.tagline,
-        image: profile.heroImage || "/college-placeholder.svg",
+        mentors: college.alumni.length,
+        reviews: college.reviews.length,
+        description: college.hero.tagline,
+        image: college.heroImage || "/college-placeholder.svg",
       };
     });
   }, [filteredColleges]);

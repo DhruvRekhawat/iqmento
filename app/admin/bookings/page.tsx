@@ -67,6 +67,8 @@ export default function AdminBookingsPage() {
         subtitle="Bookings"
         navItems={[
           { label: "Overview", href: "/admin" },
+          { label: "Colleges", href: "/admin/colleges" },
+          { label: "Alumni", href: "/admin/alumni" },
           { label: "Educators", href: "/admin/educators" },
           { label: "Bookings", href: "/admin/bookings" },
         ]}

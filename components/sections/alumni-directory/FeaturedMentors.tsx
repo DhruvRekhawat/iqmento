@@ -1,21 +1,15 @@
 import Image from "next/image";
 
 import { Container } from "@/components/shared/container";
-import type { StrapiAlumni } from "@/types/alumni";
-import { mapStrapiAlumniToAlumniProfile } from "@/lib/strapi-mappers";
+import type { AlumniProfile } from "@/data/alumni-profiles";
 
 interface FeaturedMentorsSectionProps {
-  alumni: StrapiAlumni[];
+  alumni: AlumniProfile[];
 }
 
 export function FeaturedMentorsSection({ alumni }: FeaturedMentorsSectionProps) {
-  // Filter featured alumni or take first 5
-  const featuredAlumni = alumni.filter((a) => a.isFeatured === true);
-  const otherAlumni = alumni.filter((a) => a.isFeatured !== true);
-  const featured = [
-    ...featuredAlumni.slice(0, 5),
-    ...otherAlumni.slice(0, Math.max(0, 5 - featuredAlumni.length)),
-  ].slice(0, 5);
+  // Take first 5 alumni (caller should pre-sort with featured first)
+  const featured = alumni.slice(0, 5);
 
   if (featured.length === 0) {
     return null;
@@ -40,12 +34,9 @@ export function FeaturedMentorsSection({ alumni }: FeaturedMentorsSectionProps) 
 
           <div className="marquee-mask overflow-hidden">
             <div className="marquee-track gap-8">
-              {[...featured, ...featured].map((alumniItem, index) => {
-                const mentor = mapStrapiAlumniToAlumniProfile(alumniItem);
-                return (
+              {[...featured, ...featured].map((mentor, index) => (
                   <MentorCard key={`${mentor.slug}-${index}`} mentor={mentor} />
-                );
-              })}
+              ))}
             </div>
           </div>
         </div>
@@ -54,7 +45,7 @@ export function FeaturedMentorsSection({ alumni }: FeaturedMentorsSectionProps) 
   );
 }
 
-function MentorCard({ mentor }: { mentor: ReturnType<typeof mapStrapiAlumniToAlumniProfile> }) {
+function MentorCard({ mentor }: { mentor: AlumniProfile }) {
   return (
     <article className="flex w-[340px] shrink-0 flex-col gap-6 rounded-[28px] border border-[#e0e3f4] bg-[#f8f8ff] p-6 shadow-[0_36px_110px_-72px_rgba(14,16,34,0.4)] transition-transform duration-300 hover:-translate-y-2">
       <div className="relative h-60 overflow-hidden rounded-3xl border border-[#dbdffa] bg-[#111315]">

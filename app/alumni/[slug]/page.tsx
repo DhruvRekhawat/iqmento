@@ -12,8 +12,7 @@ import {
 import { CallToAction } from "@/components/sections/cta";
 import { Footer } from "@/components/sections/footer";
 import { Testimonials } from "@/components/sections/testimonials";
-import { getAlumniBySlug, getAlumni } from "@/lib/strapi";
-import { mapStrapiAlumniToAlumniProfile } from "@/lib/strapi-mappers";
+import { getAlumniBySlug, getAlumni, getAllAlumniSlugs } from "@/lib/cms";
 import { extractTestimonialsFromAlumni } from "@/lib/testimonials-utils";
 import type { Testimonial } from "@/components/sections/testimonials/Testimonials";
 
@@ -27,49 +26,19 @@ type PageProps = {
 
 export async function generateStaticParams() {
   try {
-    const alumniResponse = await getAlumni({
-      populate: ["profile"],
-      filters: {
-        publishedAt: { $notNull: true },
-      },
-      pagination: {
-        pageSize: 100,
-      },
-    });
-
-    if (!alumniResponse || !alumniResponse.data) {
-      console.warn("No alumni data returned from Strapi for static params");
-      return [];
-    }
-
-    return alumniResponse.data
-      .map((alumni) => {
-        const slug =
-          alumni.slug ||
-          (alumni.name
-            ? alumni.name.toLowerCase().replace(/\s+/g, "-")
-            : alumni.almuniId?.toLowerCase() || null);
-        return slug ? { slug } : null;
-      })
-      .filter((item): item is { slug: string } => item !== null);
+    const slugs = await getAllAlumniSlugs();
+    return slugs.map((slug) => ({ slug }));
   } catch (error) {
     console.error("Error generating static params for alumni:", error);
-    // Return empty array to allow build to continue, pages will be generated on-demand if not static
     return [];
   }
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const alumniResponse = await getAlumniBySlug(slug, {
-    populate: ["profile", "heroImage"],
-  });
+  const profile = await getAlumniBySlug(slug);
 
-  if (!alumniResponse) {
-    return {};
-  }
-
-  const profile = mapStrapiAlumniToAlumniProfile(alumniResponse.data);
+  if (!profile) return {};
 
   const baseTitle = `${profile.name} — ${profile.headline} | IQMento Mentor`;
   const baseDescription = profile.focusAreas.length > 0
@@ -96,15 +65,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function AlumniProfilePage({ params }: PageProps) {
   const { slug } = await params;
-  const alumniResponse = await getAlumniBySlug(slug, {
-    populate: ["profile", "heroImage"],
-  });
+  const profile = await getAlumniBySlug(slug);
 
-  if (!alumniResponse) {
+  if (!profile) {
     notFound();
   }
-
-  const profile = mapStrapiAlumniToAlumniProfile(alumniResponse.data);
 
   // Fetch services from database for this educator
   let services: Array<{ id: string; title: string; description: string | null; durationMinutes: number; price: number; active: boolean; createdAt: Date; updatedAt: Date; educatorId: string }> = [];
@@ -114,7 +79,7 @@ export default async function AlumniProfilePage({ params }: PageProps) {
       where: { educatorSlug: slug },
       select: { id: true },
     });
-    
+
     if (educator) {
       const dbServices = await prisma.service.findMany({
         where: {
@@ -127,33 +92,20 @@ export default async function AlumniProfilePage({ params }: PageProps) {
     }
   } catch (error) {
     console.error("Error fetching services from DB:", error);
-    // Fallback to profile sessions if DB fetch fails
   }
 
-  // Fetch other alumni for the "Other Alumni" section
+  // Fetch other alumni
   const otherAlumniResponse = await getAlumni({
-    populate: ["profile"],
-    filters: {
-      publishedAt: { $notNull: true },
-    },
-    pagination: {
-      pageSize: 10,
-    },
+    pagination: { pageSize: 10 },
   });
 
   // Fetch testimonials from alumni reviews
   let testimonials: Testimonial[];
   try {
-    const testimonialsResponse = await getAlumni({
-      populate: "*",
-      filters: {
-        publishedAt: { $notNull: true },
-      },
-      pagination: {
-        pageSize: 100,
-      },
+    const alumniResponse = await getAlumni({
+      pagination: { pageSize: 100 },
     });
-    testimonials = extractTestimonialsFromAlumni(testimonialsResponse.data);
+    testimonials = extractTestimonialsFromAlumni(alumniResponse.data);
   } catch (error) {
     console.error("Error fetching testimonials:", error);
     testimonials = [];
@@ -167,8 +119,8 @@ export default async function AlumniProfilePage({ params }: PageProps) {
         <ProfileOverviewSection profile={profile} />
         <ProfileSessionsSection profile={profile} services={services} />
         <ProfileReviewsSection profile={profile} />
-        <OtherAlumniSection 
-          currentSlug={profile.slug} 
+        <OtherAlumniSection
+          currentSlug={profile.slug}
           otherAlumni={otherAlumniResponse.data}
         />
         <Testimonials testimonials={testimonials} />
@@ -178,5 +130,3 @@ export default async function AlumniProfilePage({ params }: PageProps) {
     </>
   );
 }
-
-

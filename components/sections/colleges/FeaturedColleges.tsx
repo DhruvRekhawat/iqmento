@@ -3,8 +3,7 @@ import { MapPin, Users2 } from "lucide-react";
 import Image from "next/image";
 
 import { Section } from "@/components/shared/section";
-import type { StrapiCollege } from "@/types/college";
-import { mapStrapiCollegeToCollegeProfile } from "@/lib/strapi-mappers";
+import type { CollegeProfile } from "@/data/college-profiles";
 
 interface College {
   name: string;
@@ -16,21 +15,18 @@ interface College {
 }
 
 interface FeaturedCollegesProps {
-  colleges: StrapiCollege[];
+  colleges: CollegeProfile[];
 }
 
 export function FeaturedColleges({ colleges }: FeaturedCollegesProps) {
-  const mappedColleges = colleges.map((college) => {
-    const profile = mapStrapiCollegeToCollegeProfile(college);
-    return {
-      name: profile.name,
-      description: profile.hero.tagline || profile.hero.description || "",
-      mentors: profile.alumni.length,
-      reviews: profile.reviews.length,
-      location: profile.location,
-      image: profile.heroImage || "/college-placeholder.svg",
-    };
-  });
+  const mappedColleges = colleges.map((college) => ({
+    name: college.name,
+    description: college.hero.tagline || college.hero.description || "",
+    mentors: college.alumni.length,
+    reviews: college.reviews.length,
+    location: college.location,
+    image: college.heroImage || "/college-placeholder.svg",
+  }));
 
   // Split into most booked (first 3) and rising (next 3)
   const MOST_BOOKED = mappedColleges.slice(0, 3);

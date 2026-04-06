@@ -3,8 +3,7 @@ import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
 import { Section } from "@/components/shared/section";
-import { getAlumni } from "@/lib/strapi";
-import { mapStrapiAlumniToMentorCard } from "@/lib/strapi-mappers";
+import { getAlumniRaw, mapDbAlumniToMentorCard } from "@/lib/cms";
 
 type MentorCardContent = {
   slug: string;
@@ -19,32 +18,21 @@ export async function Alumni() {
   let mentors: MentorCardContent[] = [];
 
   try {
-    const alumniResponse = await getAlumni({
-      populate: ["profile"],
-      filters: {
-        publishedAt: { $notNull: true },
-      },
+    const alumniRaw = await getAlumniRaw({
       pagination: {
         pageSize: 20,
       },
-      sort: ["isFeatured:desc", "createdAt:desc"],
     });
 
-    if (alumniResponse?.data && Array.isArray(alumniResponse.data)) {
-      mentors = alumniResponse.data.map(mapStrapiAlumniToMentorCard);
-    } else {
-      console.warn("Alumni API returned unexpected format:", alumniResponse);
-    }
+    mentors = alumniRaw.map(mapDbAlumniToMentorCard);
   } catch (error) {
     console.error("Error fetching alumni:", error);
-    // Log more details in development
     if (process.env.NODE_ENV === 'development') {
       console.error("Error details:", {
         message: error instanceof Error ? error.message : String(error),
         stack: error instanceof Error ? error.stack : undefined,
       });
     }
-    // Fallback to empty array
   }
   return (
     <Section

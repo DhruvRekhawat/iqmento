@@ -10,31 +10,19 @@ import type { Testimonial } from "@/components/sections/testimonials/Testimonial
 import { FAQ } from "@/components/sections/faq";
 import { CallToAction } from "@/components/sections/cta";
 import { Footer } from "@/components/sections/footer";
-import { getColleges, getAlumni } from "@/lib/strapi";
+import { getColleges, getAlumni } from "@/lib/cms";
 import { extractTestimonialsFromAlumni } from "@/lib/testimonials-utils";
 
 export default async function Home() {
   const collegesResponse = await getColleges({
-    populate: ["heroImage"],
-    filters: {
-      publishedAt: { $notNull: true },
-    },
-    pagination: {
-      pageSize: 6,
-    },
+    pagination: { pageSize: 6 },
   });
 
-  // Fetch alumni with reviews for testimonials
+  // Fetch alumni for testimonials
   let testimonials: Testimonial[];
   try {
     const alumniResponse = await getAlumni({
-      populate: "*",
-      filters: {
-        publishedAt: { $notNull: true },
-      },
-      pagination: {
-        pageSize: 100,
-      },
+      pagination: { pageSize: 100 },
     });
     testimonials = extractTestimonialsFromAlumni(alumniResponse.data);
   } catch (error) {

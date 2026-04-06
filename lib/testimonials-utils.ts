@@ -1,35 +1,31 @@
-import type { StrapiAlumni } from "@/types/alumni";
+import type { AlumniProfile } from "@/data/alumni-profiles";
 import type { Testimonial } from "@/components/sections/testimonials/Testimonials";
 
 /**
  * Extract and transform reviews from alumni data into testimonials format
  */
 export function extractTestimonialsFromAlumni(
-  alumni: StrapiAlumni[]
+  alumni: AlumniProfile[]
 ): Testimonial[] {
-  // Extract reviews from all alumni
   const testimonialsWithRating: Array<Testimonial & { rating?: number }> = [];
 
   for (const alum of alumni) {
-    if (!alum.reviews || !Array.isArray(alum.reviews)) {
+    if (!alum.reviews || alum.reviews.length === 0) {
       continue;
     }
 
     for (const review of alum.reviews) {
-      // Only include reviews that have a quote/comment
-      const quote = review.quote || review.comment;
+      const quote = review.quote;
       if (!quote || quote.trim().length === 0) {
         continue;
       }
 
-      // Extract name and role/context
-      const name = review.name || review.author || "Anonymous";
+      const name = review.name || "Anonymous";
       const role = review.role || "Student";
-      
-      // Build context - combine name location if available, otherwise use role
+
+      // Build context - combine city from location if available
       let context = role;
       if (alum.location) {
-        // Try to extract city from location (e.g., "Bangalore, India" -> "Bangalore")
         const city = alum.location.split(",")[0]?.trim();
         if (city) {
           context = `${city}${role !== "Student" ? ` · ${role}` : ""}`;
@@ -47,13 +43,11 @@ export function extractTestimonialsFromAlumni(
 
   // Sort by rating (highest first) if available, then by length (more detailed first)
   testimonialsWithRating.sort((a, b) => {
-    // First sort by rating if available
     if (a.rating !== undefined && b.rating !== undefined) {
       return b.rating - a.rating;
     }
     if (a.rating !== undefined) return -1;
     if (b.rating !== undefined) return 1;
-    // If no rating, sort by quote length (more detailed first)
     return b.quote.length - a.quote.length;
   });
 
@@ -61,4 +55,3 @@ export function extractTestimonialsFromAlumni(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   return testimonialsWithRating.slice(0, 10).map(({ rating, ...testimonial }) => testimonial);
 }
-

@@ -34,9 +34,8 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "credible-sharing-b61c46eae9.media.strapiapp.com",
-        port: "",
-        pathname: "/**",
+        hostname: "res.cloudinary.com",
+        pathname: "/duj4q3pzj/**",
       },
     ],
   },
