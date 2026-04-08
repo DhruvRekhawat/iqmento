@@ -63,17 +63,26 @@ function mapDbCollegeToProfile(c: DbCollege & { alumni?: DbAlumni[] }): CollegeP
       };
     })(),
     about: parseJson<string[]>(c.about, []),
-    courses: parseJson<CourseDetail[]>(c.courses, []),
-    admission: parseJson<{ title: string; subtitle: string; steps: AdmissionStep[] }>(
-      c.admission,
-      { title: "Admission Process", subtitle: "Learn about the admission requirements", steps: [] }
-    ),
-    recruiters: parseJson<{
-      title: string;
-      logos: string[];
-      cutoff: string[];
-      placements: PlacementHighlight[];
-    }>(c.recruiters, { title: "Top Recruiters", logos: [], cutoff: [], placements: [] }),
+    courses: parseJson<CourseDetail[]>(c.courses, []).map((course) => ({
+      ...course,
+      coursesOffered: course.coursesOffered ?? [],
+    })),
+    admission: (() => {
+      const parsed = parseJson<{ title: string; subtitle: string; steps: AdmissionStep[] }>(
+        c.admission,
+        { title: "Admission Process", subtitle: "Learn about the admission requirements", steps: [] }
+      );
+      return { title: parsed.title || "Admission Process", subtitle: parsed.subtitle || "Learn about the admission requirements", steps: parsed.steps ?? [] };
+    })(),
+    recruiters: (() => {
+      const parsed = parseJson<{
+        title: string;
+        logos: string[];
+        cutoff: string[];
+        placements: PlacementHighlight[];
+      }>(c.recruiters, { title: "Top Recruiters", logos: [], cutoff: [], placements: [] });
+      return { title: parsed.title || "Top Recruiters", logos: parsed.logos ?? [], cutoff: parsed.cutoff ?? [], placements: parsed.placements ?? [] };
+    })(),
     reviews: parseJson<ReviewDetail[]>(c.reviews, []),
     alumni: (c.alumni || []).map((a) => ({
       name: a.name,
