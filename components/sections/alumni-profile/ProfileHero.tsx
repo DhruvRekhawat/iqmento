@@ -25,13 +25,13 @@ export function AlumniProfileHero({ profile }: AlumniProfileHeroProps) {
           <div className="relative flex flex-col gap-10 lg:flex-row lg:items-center lg:justify-between lg:gap-16">
             <div className="relative mx-auto flex w-full max-w-[220px] shrink-0 items-center justify-center lg:mx-0 lg:max-w-[240px]">
               <div className="relative aspect-square w-full overflow-hidden rounded-[20px] border border-white/20 bg-white/10 ">
-                <Image
-                  src={profile.heroImage}
-                  alt={profile.name}
-                  width={320}
-                  height={320}
-                  className="h-full w-full object-cover"
-                />
+            <Image
+  src={profile.image || profile.heroImage}
+  alt={profile.name}
+  width={320}
+  height={320}
+  className="h-full w-full object-cover"
+/>
               </div>
             </div>
 

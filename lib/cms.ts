@@ -30,19 +30,31 @@ export type { CollegeProfile, AlumniProfile };
 
 // ---------- College helpers ----------
 
-const BROKEN_IMAGE_HOSTS = ["assets.iqmento.com"];
+// const BROKEN_IMAGE_HOSTS = ["assets.iqmento.com"];
+
+const BROKEN_IMAGE_HOSTS: string[] = [];
 
 function safeImage(url: string | null | undefined, fallback: string): string {
-  if (!url) return fallback;
+  if (!url || url.trim() === "") return fallback;
+
   try {
     const host = new URL(url).hostname;
-    if (BROKEN_IMAGE_HOSTS.includes(host)) return fallback;
+
+    if (BROKEN_IMAGE_HOSTS.includes(host)) {
+      if (process.env.NODE_ENV === "development") {
+        console.warn(`[safeImage] Blocked image from host: ${host} → using fallback`);
+      }
+      return fallback;
+    }
   } catch {
-    // relative path — leave as-is
+    if (process.env.NODE_ENV === "development") {
+      console.warn(`[safeImage] Invalid URL: "${url}" → using fallback`);
+    }
+    return fallback;
   }
+
   return url;
 }
-
 const defaultHero: CollegeHeroContent = {
   tagline: "Explore this college",
   description: "Learn more about this institution",
@@ -101,7 +113,7 @@ function mapDbCollegeToProfile(c: DbCollege & { alumni?: DbAlumni[] }): CollegeP
       name: a.name,
       role: a.currentJobRole || "Alumni",
       company: a.currentCompany || "",
-      image: safeImage(a.profileImageUrl, "/alumini-placeholder.png"),
+      image: a.profileImageUrl || "/alumini-placeholder.png",
     })),
     faqs: parseJson<FaqDetail[]>(c.faqs, []),
     metadata: (() => {
@@ -145,7 +157,7 @@ function mapDbAlumniToProfile(a: DbAlumni): AlumniProfile {
     heroSummary: parseJson<string[]>(a.heroSummary, [a.bio || "Experienced professional"]),
     overview: parseJson<string[]>(a.overview, [a.bio || "Alumni profile information"]),
     image: safeImage(a.profileImageUrl, "/alumini-placeholder.png"),
-    heroImage: safeImage(a.heroImageUrl, safeImage(a.profileImageUrl, "/alumini-placeholder.png")),
+heroImage: a.heroImageUrl || a.profileImageUrl || "/alumini-placeholder.png",
     availability: a.availability || "Available for sessions",
     stats: parseJson<MentorSummary[]>(a.stats, []),
     focusAreas: parseJson<FocusArea[]>(a.focusAreas, []),

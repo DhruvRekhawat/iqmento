@@ -30,8 +30,8 @@ const nextConfig: NextConfig = {
   },
   // Exclude libsql packages from server-side bundling issues
   serverExternalPackages: ["@libsql/client", "@prisma/adapter-libsql"],
-  images: {
-    remotePatterns: [
+ images: {
+  remotePatterns: [
       { protocol: "https", hostname: "via.placeholder.com", pathname: "/**" },
       { protocol: "https", hostname: "example.com", pathname: "/**" },
       { protocol: "https", hostname: "placehold.co", pathname: "/**" },
@@ -39,8 +39,9 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "lh3.googleusercontent.com", pathname: "/**" },
       { protocol: "https", hostname: "avatars.githubusercontent.com", pathname: "/**" },
       { protocol: "https", hostname: "images.unsplash.com", pathname: "/**" },
+      { protocol: "https", hostname: "assets.iqmento.com", pathname: "/**" },
     ],
-  },
+},
 };
 
 export default nextConfig;
