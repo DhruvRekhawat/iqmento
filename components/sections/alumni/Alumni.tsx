@@ -58,7 +58,7 @@ export async function Alumni() {
 
         <div className="relative z-10">
           {mentors.length > 0 ? (
-            <div className="marquee-mask overflow-hidden bg-white/60 p-6 shadow-[0_40px_120px_rgba(110,70,255,0.16)] backdrop-blur-xl">
+            <div className="overflow-hidden bg-white/60 p-4 sm:p-6 shadow-[0_40px_120px_rgba(110,70,255,0.16)] backdrop-blur-xl sm:marquee-mask">
               <div className="marquee-track gap-6">
                 {[...mentors, ...mentors].map((mentor, idx) => (
                   <MentorCard key={`${mentor.slug}-${idx}`} {...mentor} />

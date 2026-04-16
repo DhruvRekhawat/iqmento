@@ -76,14 +76,17 @@ function FeatureCard({ title, image, gradient, textClass }: FeatureCardProps) {
           {title}
         </h3>
 
-        <div className="relative bottom-0 h-[320px] w-full ">
-          <Image
-            src={image}
-            alt={title}
-            fill
-            className="object-contain object-bottom -translate-y-[48px] pb-0 transition-transform duration-500 group-hover:scale-135 scale-130"
-          />
-        </div>
+    <div className="relative bottom-0 w-full h-[220px] sm:h-[260px] md:h-[320px]">
+  <Image
+    src={image}
+    alt={title}
+    fill
+    className="object-contain object-bottom transition-transform duration-500 
+    scale-100 sm:scale-110 md:scale-130 
+    sm:-translate-y-[20px] md:-translate-y-[48px] 
+    group-hover:scale-110 md:group-hover:scale-135"
+  />
+</div>
       </div>
     </article>
   );

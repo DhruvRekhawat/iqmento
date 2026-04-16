@@ -40,11 +40,11 @@ export default async function AlumniDirectoryPage() {
 
   try {
     const [alumniResponse, collegesResponse] = await Promise.all([
-      getAlumni({ pagination: { pageSize: 100 } }).catch((err) => {
+      getAlumni({ pagination: { pageSize: 1000 } }).catch((err) => {
         console.error("Error fetching alumni:", err);
         return { data: [] as Awaited<ReturnType<typeof getAlumni>>["data"], meta: { total: 0, page: 1, pageSize: 100 } };
       }),
-      getColleges({ pagination: { pageSize: 50 } }).catch((err) => {
+      getColleges({ pagination: { pageSize: 1000 } }).catch((err) => {
         console.error("Error fetching colleges:", err);
         return { data: [] as Awaited<ReturnType<typeof getColleges>>["data"], meta: { total: 0, page: 1, pageSize: 50 } };
       }),

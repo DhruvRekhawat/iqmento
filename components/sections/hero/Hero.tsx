@@ -12,7 +12,7 @@ const HERO_DESCRIPTION =
 export function Hero() {
   return (
     <Section id="hero" variant="hero" spacing="loose" bleed>
-      <div className="relative mx-auto w-full h-full min-h-[720px]  overflow-hidden rounded-sm bg-white sm:px-4 md:py-16 pb-0">
+<div className="relative mx-auto w-full h-full min-h-[720px] overflow-hidden rounded-sm bg-white pt-20 sm:pt-24 md:pt-0 sm:px-4 md:py-16 pb-0">
         <HeroBackgroundSurface />
         <InnerFrameGlow />
 

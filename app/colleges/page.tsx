@@ -39,7 +39,7 @@ export default async function AllCollegesPage() {
 
   try {
     const [collegesResponse, alumniResponse] = await Promise.all([
-      getColleges({ pagination: { pageSize: 100 } }).catch((err) => {
+      getColleges({ pagination: { pageSize: 1000 } }).catch((err) => {
         console.error("Error fetching colleges:", err);
         return { data: [] as Awaited<ReturnType<typeof getColleges>>["data"], meta: { total: 0, page: 1, pageSize: 100 } };
       }),
