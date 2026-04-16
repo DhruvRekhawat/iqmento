@@ -76,18 +76,42 @@ export function SearchBar({
     }
 
     const searchTerm = query.toLowerCase().trim();
-    const filtered = allItems.filter((item) => {
-      // Ensure we have valid strings to search
-      const name = (item.name || "").toLowerCase();
-      const location = (item.location || "").toLowerCase();
-      const subtitle = (item.subtitle || "").toLowerCase();
-      
-      const nameMatch = name.includes(searchTerm);
-      const locationMatch = location.includes(searchTerm);
-      const subtitleMatch = subtitle.includes(searchTerm);
-      
-      return nameMatch || locationMatch || subtitleMatch;
-    });
+   const filtered = allItems
+  .filter((item) => {
+    const name = (item.name || "").toLowerCase();
+    const location = (item.location || "").toLowerCase();
+    const subtitle = (item.subtitle || "").toLowerCase();
+
+    const searchTerm = query.toLowerCase().trim();
+
+    return (
+      name.includes(searchTerm) ||
+      location.includes(searchTerm) ||
+      subtitle.includes(searchTerm)
+    );
+  })
+  .sort((a, b) => {
+    const searchTerm = query.toLowerCase().trim();
+
+    const aName = (a.name || "").toLowerCase();
+    const bName = (b.name || "").toLowerCase();
+
+    // 🔥 EXACT MATCH
+    if (aName === searchTerm) return -1;
+    if (bName === searchTerm) return 1;
+
+    // 🔥 STARTS WITH
+    if (aName.startsWith(searchTerm)) return -1;
+    if (bName.startsWith(searchTerm)) return 1;
+
+    // 🔥 INCLUDES
+    if (aName.includes(searchTerm) && !bName.includes(searchTerm)) return -1;
+    if (!aName.includes(searchTerm) && bName.includes(searchTerm)) return 1;
+
+    return 0;
+  });
+
+return filtered.slice(0, 8);
 
     return filtered.slice(0, 8); // Limit to 8 results
   }, [query, allItems]);

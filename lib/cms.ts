@@ -229,20 +229,48 @@ export async function getColleges(options?: {
   const [colleges, total] = await Promise.all([
     prisma.college.findMany({
       where,
-      skip,
-      take: pageSize,
-      orderBy: options?.sort
-        ? { [options.sort.replace("-", "")]: options.sort.startsWith("-") ? "desc" : "asc" }
-        : { createdAt: "desc" },
+    ...(options?.filters?.search ? {} : { skip, take: pageSize }),
+orderBy: options?.filters?.search
+  ? undefined
+  : options?.sort
+    ? { [options.sort.replace("-", "")]: options.sort.startsWith("-") ? "desc" : "asc" }
+    : { createdAt: "desc" },
       include: { alumni: true },
     }),
     prisma.college.count({ where }),
   ]);
 
-  return {
-    data: colleges.map((c) => mapDbCollegeToProfile(c)),
-    meta: { total, page, pageSize },
-  };
+ let mappedColleges = colleges.map((c) => mapDbCollegeToProfile(c));
+
+// ✅ ADD THIS BLOCK HERE
+if (options?.filters?.search) {
+  const search = options.filters.search.toLowerCase();
+
+  mappedColleges = mappedColleges.sort((a, b) => {
+    const aName = a.name.toLowerCase();
+    const bName = b.name.toLowerCase();
+
+    // Exact match first
+    if (aName === search) return -1;
+    if (bName === search) return 1;
+
+    // Starts with
+    if (aName.startsWith(search)) return -1;
+    if (bName.startsWith(search)) return 1;
+
+    // Includes
+    if (aName.includes(search) && !bName.includes(search)) return -1;
+    if (!aName.includes(search) && bName.includes(search)) return 1;
+
+    return 0;
+  });
+}
+
+// ✅ RETURN UPDATED DATA
+return {
+  data: mappedColleges,
+  meta: { total, page, pageSize },
+};
 }
 
 export async function getCollegeBySlug(slug: string): Promise<CollegeProfile | null> {

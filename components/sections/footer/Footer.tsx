@@ -42,7 +42,7 @@ export function Footer() {
           <section className="grid gap-10 text-sm font-medium text-[#c2ccc6] sm:grid-cols-2 lg:grid-cols-4 lg:text-base">
             
             <div className="space-y-2">
-              <p className="text-xs uppercase tracking-[0.28em] text-[#8f9a93]">
+              <p className="text-xs uppercase tracking-[0.28em] text-[#aab5ad]">
                 Contact Us
               </p>
               <Link href="tel:+18919891191" className="text-xl font-semibold tracking-[-0.02em] text-white">
@@ -51,14 +51,14 @@ export function Footer() {
             </div>
 
             <div className="space-y-2">
-              <p className="text-xs uppercase tracking-[0.28em] text-[#8f9a93]">
+              <p className="text-xs uppercase tracking-[0.28em] text-[#aab5ad]">
                 Location
               </p>
               <p>2972 Westheimer Rd. Santa Ana, Illinois 85486</p>
             </div>
 
             <div className="space-y-2">
-              <p className="text-xs uppercase tracking-[0.28em] text-[#8f9a93]">
+              <p className="text-xs uppercase tracking-[0.28em] text-[#aab5ad]">
                 Email
               </p>
               <Link href="mailto:hello@iqmento.com" className="transition-colors hover:text-white">
@@ -67,7 +67,7 @@ export function Footer() {
             </div>
 
             <div className="space-y-2">
-              <p className="text-xs uppercase tracking-[0.28em] text-[#8f9a93]">
+              <p className="text-xs uppercase tracking-[0.28em] text-[#aab5ad]">
                 Mo—Fr
               </p>
               <p className="text-2xl font-semibold text-white">9am—6pm</p>
@@ -77,7 +77,7 @@ export function Footer() {
 
         {/* BOTTOM SECTION */}
         <div className="flex flex-col gap-12">
-          <p className="text-sm text-[#8f9a93]">
+          <p className="text-sm text-[#aab5ad]">
             © {new Date().getFullYear()} — Copyright
           </p>
 
