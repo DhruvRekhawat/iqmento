@@ -31,6 +31,9 @@ interface SearchBarProps {
     image?: string;
   }>;
   className?: string;
+
+  // ✅ ADD THIS
+  searchType?: "all" | "alumni" | "college";
 }
 
 export function SearchBar({
@@ -38,6 +41,7 @@ export function SearchBar({
   colleges = [],
   alumni = [],
   className = "",
+   searchType = "all", // ✅ ADD THIS
 }: SearchBarProps) {
   const [query, setQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
@@ -46,28 +50,32 @@ export function SearchBar({
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Combine and transform data for search
-  const allItems: SearchResult[] = useMemo(
-    () => [
-      ...colleges.map((college) => ({
-        id: `college-${college.slug}`,
-        slug: college.slug,
-        name: college.name,
-        type: "college" as const,
-        location: college.location,
-        image: college.heroImage || undefined,
-      })),
-      ...alumni.map((alum) => ({
-        id: `alumni-${alum.slug}`,
-        slug: alum.slug,
-        name: alum.name,
-        type: "alumni" as const,
-        location: alum.location,
-        subtitle: alum.headline,
-        image: alum.image,
-      })),
-    ],
-    [colleges, alumni]
-  );
+const allItems: SearchResult[] = useMemo(() => {
+  const collegeItems = colleges.map((college) => ({
+    id: `college-${college.slug}`,
+    slug: college.slug,
+    name: college.name,
+    type: "college" as const,
+    location: college.location,
+    image: college.heroImage || undefined,
+  }));
+
+  const alumniItems = alumni.map((alum) => ({
+    id: `alumni-${alum.slug}`,
+    slug: alum.slug,
+    name: alum.name,
+    type: "alumni" as const,
+    location: alum.location,
+    subtitle: alum.headline,
+    image: alum.image,
+  }));
+
+  // ✅ FILTER BASED ON PAGE
+  if (searchType === "alumni") return alumniItems;
+  if (searchType === "college") return collegeItems;
+
+  return [...collegeItems, ...alumniItems];
+}, [colleges, alumni, searchType]);
 
   // Filter results based on query using useMemo
   const results = useMemo(() => {
@@ -113,7 +121,6 @@ export function SearchBar({
 
 return filtered.slice(0, 8);
 
-    return filtered.slice(0, 8); // Limit to 8 results
   }, [query, allItems]);
 
   // Update isOpen based on results
