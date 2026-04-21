@@ -1,8 +1,8 @@
 export const faqs = [
   {
-    question: "How does IQMento work?",
+    question: "How does IQMENTO work?",
     answer:
-      "IQMento connects students with verified alumni mentors for 1:1 guidance on college, career, and skills.",
+      "IQMENTO connects students with verified alumni mentors for 1:1 guidance on college, career, and skills.",
   },
   {
     question: "How can I book a mentor session?",

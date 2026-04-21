@@ -31,9 +31,7 @@ export default function FAQPage() {
 
             {/* Title */}
             <div className="text-center mb-16">
-              <span className="inline-block mb-4 px-4 py-1.5 rounded-full text-xs font-semibold tracking-widest uppercase bg-[#9a3bff]/10 text-[#9a3bff] border border-[#9a3bff]/20">
-                Support
-              </span>
+             
               <h1 className="text-5xl font-bold text-gray-900 tracking-tight leading-tight">
                 Frequently Asked
                 <br />
@@ -42,7 +40,7 @@ export default function FAQPage() {
                 </span>
               </h1>
               <p className="mt-4 text-gray-500 text-lg max-w-xl mx-auto leading-relaxed">
-                Everything you need to know about IQMento
+                Everything you need to know about IQMENTO
               </p>
             </div>
 
