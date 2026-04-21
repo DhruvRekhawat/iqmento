@@ -10,10 +10,11 @@ import { Container } from "@/components/shared/container";
 import { useAuth } from "@/lib/auth";
 
 const NAV_ITEMS: { label: string; href: string }[] = [
+    { label: "Home", href: "/" }, // ✅ ADDED
   { label: "Colleges", href: "/colleges" },
   { label: "Alumni", href: "/alumni" },
   { label: "About Us", href: "/about-us" },
-  { label: "FAQ", href: "#faq" },
+  { label: "FAQ", href: "/faq" },
   { label: "Become a Mentor", href: "#cta" },
 ];
 

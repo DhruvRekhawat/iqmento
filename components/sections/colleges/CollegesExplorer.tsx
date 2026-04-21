@@ -1,14 +1,15 @@
-
 "use client";
 
 import { useState, useMemo, useRef, useEffect } from "react";
 import type { ReactNode } from "react";
-import { BookOpen, ChevronDown, MapPin, Star, Users2, X } from "lucide-react";
+import { BookOpen, ChevronDown, ChevronLeft, ChevronRight, MapPin, Star, Users2, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
 import { Section } from "@/components/shared/section";
 import type { CollegeProfile } from "@/data/college-profiles";
+
+const COLLEGES_PER_PAGE = 12;
 
 type CollegeWithMeta = CollegeProfile & {
   collegeType?: string | null;
@@ -59,13 +60,13 @@ export function CollegesExplorer({ colleges }: CollegesExplorerProps) {
     location: null,
   });
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Extract unique locations from colleges
   const locations = useMemo(() => {
     const locationSet = new Set<string>();
     colleges.forEach((college) => {
       if (college.location) {
-        // Extract city from location (e.g., "Ahmedabad, Gujarat" -> "Ahmedabad")
         const city = college.location.split(",")[0]?.trim();
         if (city) locationSet.add(city);
       }
@@ -96,9 +97,17 @@ export function CollegesExplorer({ colleges }: CollegesExplorerProps) {
     });
   }, [colleges, filters]);
 
-  // Generate college cards from filtered colleges
+  // Pagination
+  const totalPages = Math.ceil(filteredColleges.length / COLLEGES_PER_PAGE);
+
+  const paginatedColleges = useMemo(() => {
+    const start = (currentPage - 1) * COLLEGES_PER_PAGE;
+    return filteredColleges.slice(start, start + COLLEGES_PER_PAGE);
+  }, [filteredColleges, currentPage]);
+
+  // Generate college cards from paginated colleges
   const collegeCards = useMemo(() => {
-    return filteredColleges.map((college) => {
+    return paginatedColleges.map((college) => {
       const programNames = college.courses.map((course) => course.name);
       return {
         slug: college.slug,
@@ -114,7 +123,7 @@ export function CollegesExplorer({ colleges }: CollegesExplorerProps) {
         image: college.heroImage || "/college-placeholder.svg",
       };
     });
-  }, [filteredColleges]);
+  }, [paginatedColleges]);
 
   // Get active filters for display
   const activeFilters = useMemo(() => {
@@ -141,6 +150,7 @@ export function CollegesExplorer({ colleges }: CollegesExplorerProps) {
       [key]: value,
     }));
     setOpenDropdown(null);
+    setCurrentPage(1); // Reset to page 1 on filter change
   };
 
   const handleRemoveFilter = (key: keyof FilterState) => {
@@ -148,6 +158,7 @@ export function CollegesExplorer({ colleges }: CollegesExplorerProps) {
       ...prev,
       [key]: null,
     }));
+    setCurrentPage(1);
   };
 
   const handleClearFilters = () => {
@@ -158,6 +169,13 @@ export function CollegesExplorer({ colleges }: CollegesExplorerProps) {
       location: null,
     });
     setOpenDropdown(null);
+    setCurrentPage(1);
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    // Scroll to top of section smoothly
+    document.getElementById("colleges-explorer")?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   const hasActiveFilters = activeFilters.length > 0;
@@ -166,7 +184,8 @@ export function CollegesExplorer({ colleges }: CollegesExplorerProps) {
     <Section id="colleges-explorer" className="bg-white">
       <div className="flex flex-col gap-12">
         <div className="flex flex-col gap-6">
-          <div className="flex flex-wrap gap-3">
+          {/* Filter dropdowns — horizontal scroll on mobile */}
+          <div className="flex flex-wrap gap-3 overflow-x-auto pb-1 sm:flex-wrap sm:overflow-visible">
             <FilterDropdown
               label="College Type"
               isOpen={openDropdown === "collegeType"}
@@ -223,7 +242,22 @@ export function CollegesExplorer({ colleges }: CollegesExplorerProps) {
           )}
         </div>
 
-        <div className="grid gap-8 lg:grid-cols-3">
+        {/* Results count */}
+        {filteredColleges.length > 0 && (
+          <p className="text-sm text-[#5b5f72] -mt-6">
+            Showing{" "}
+            <span className="font-semibold text-[#11121b]">
+              {(currentPage - 1) * COLLEGES_PER_PAGE + 1}–
+              {Math.min(currentPage * COLLEGES_PER_PAGE, filteredColleges.length)}
+            </span>{" "}
+            of{" "}
+            <span className="font-semibold text-[#11121b]">{filteredColleges.length}</span>{" "}
+            colleges
+          </p>
+        )}
+
+        {/* College grid — 1 col on mobile, 2 on tablet, 3 on desktop */}
+        <div className="grid gap-6 sm:gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {collegeCards.length > 0 ? (
             collegeCards.map((college) => (
               <CollegeCard key={college.slug} {...college} />
@@ -240,10 +274,103 @@ export function CollegesExplorer({ colleges }: CollegesExplorerProps) {
             </div>
           )}
         </div>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          />
+        )}
       </div>
     </Section>
   );
 }
+
+// ─── Pagination ───────────────────────────────────────────────────────────────
+
+interface PaginationProps {
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+}
+
+function Pagination({ currentPage, totalPages, onPageChange }: PaginationProps) {
+  // Build page number list with ellipsis
+  const pages = useMemo(() => {
+    const items: (number | "…")[] = [];
+    if (totalPages <= 7) {
+      for (let i = 1; i <= totalPages; i++) items.push(i);
+    } else {
+      items.push(1);
+      if (currentPage > 3) items.push("…");
+      const start = Math.max(2, currentPage - 1);
+      const end = Math.min(totalPages - 1, currentPage + 1);
+      for (let i = start; i <= end; i++) items.push(i);
+      if (currentPage < totalPages - 2) items.push("…");
+      items.push(totalPages);
+    }
+    return items;
+  }, [currentPage, totalPages]);
+
+  return (
+    <div className="flex items-center justify-center gap-1 sm:gap-2 pt-4">
+      {/* Prev */}
+      <button
+        type="button"
+        onClick={() => onPageChange(currentPage - 1)}
+        disabled={currentPage === 1}
+        aria-label="Previous page"
+        className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#e5e7ef] bg-white text-[#535353] transition-colors hover:border-[#4f39f6] hover:text-[#4f39f6] disabled:pointer-events-none disabled:opacity-40"
+      >
+        <ChevronLeft className="h-4 w-4" />
+      </button>
+
+      {/* Page numbers */}
+      <div className="flex items-center gap-1 sm:gap-2">
+        {pages.map((page, idx) =>
+          page === "…" ? (
+            <span
+              key={`ellipsis-${idx}`}
+              className="flex h-10 w-8 items-center justify-center text-sm text-[#9e9e9e] select-none"
+            >
+              …
+            </span>
+          ) : (
+            <button
+              key={page}
+              type="button"
+              onClick={() => onPageChange(page)}
+              aria-label={`Page ${page}`}
+              aria-current={currentPage === page ? "page" : undefined}
+              className={`flex h-10 min-w-[2.5rem] items-center justify-center rounded-xl border px-3 text-sm font-medium transition-colors ${
+                currentPage === page
+                  ? "border-[#4f39f6] bg-[#4f39f6] text-white"
+                  : "border-[#e5e7ef] bg-white text-[#535353] hover:border-[#4f39f6] hover:text-[#4f39f6]"
+              }`}
+            >
+              {page}
+            </button>
+          )
+        )}
+      </div>
+
+      {/* Next */}
+      <button
+        type="button"
+        onClick={() => onPageChange(currentPage + 1)}
+        disabled={currentPage === totalPages}
+        aria-label="Next page"
+        className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#e5e7ef] bg-white text-[#535353] transition-colors hover:border-[#4f39f6] hover:text-[#4f39f6] disabled:pointer-events-none disabled:opacity-40"
+      >
+        <ChevronRight className="h-4 w-4" />
+      </button>
+    </div>
+  );
+}
+
+// ─── Filter Dropdown ──────────────────────────────────────────────────────────
 
 interface FilterDropdownProps {
   label: string;
@@ -265,7 +392,6 @@ function FilterDropdown({
   const dropdownRef = useRef<HTMLDivElement>(null);
   const isActive = selectedValue !== null;
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -286,7 +412,7 @@ function FilterDropdown({
       <button
         type="button"
         onClick={onToggle}
-        className={`flex items-center gap-2 rounded-2xl border px-5 py-3 text-sm font-medium transition-colors ${
+        className={`flex items-center gap-2 rounded-2xl border px-5 py-3 text-sm font-medium transition-colors whitespace-nowrap ${
           isActive
             ? "border-[#4f39f6] bg-[#edeaff] text-[#2f23a8]"
             : "border-[#d7dae2] bg-white text-[#535353] hover:border-[#b9bed1]"
@@ -333,6 +459,8 @@ function FilterDropdown({
   );
 }
 
+// ─── Action Pill ──────────────────────────────────────────────────────────────
+
 function ActionPill({
   variant,
   children,
@@ -347,7 +475,7 @@ function ActionPill({
       <button
         type="button"
         onClick={onClick}
-        className="rounded-2xl border border-transparent px-5 py-3 text-sm font-semibold text-[#4f39f6] transition-colors hover:text-[#2f23a8]"
+        className="rounded-2xl border border-transparent px-5 py-3 text-sm font-semibold text-[#4f39f6] transition-colors hover:text-[#2f23a8] whitespace-nowrap"
       >
         {children}
       </button>
@@ -365,6 +493,8 @@ function ActionPill({
   );
 }
 
+// ─── Active Filter ────────────────────────────────────────────────────────────
+
 function ActiveFilter({ label, onRemove }: { label: string; onRemove: () => void }) {
   return (
     <button
@@ -377,6 +507,8 @@ function ActiveFilter({ label, onRemove }: { label: string; onRemove: () => void
     </button>
   );
 }
+
+// ─── College Card ─────────────────────────────────────────────────────────────
 
 interface CollegeCardProps {
   slug: string;
@@ -410,7 +542,7 @@ function CollegeCard({
             src={image}
             alt={name}
             fill
-            sizes="(max-width: 1024px) 100vw, 360px"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 360px"
             className="object-cover opacity-75"
           />
         </div>
@@ -444,6 +576,8 @@ function CollegeCard({
   );
 }
 
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
 function InfoRow({ icon, label }: { icon: ReactNode; label: string }) {
   return (
     <span className="flex items-center gap-3">
@@ -462,4 +596,3 @@ function StarRow() {
     </span>
   );
 }
-

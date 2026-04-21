@@ -15,6 +15,7 @@ import { Testimonials } from "@/components/sections/testimonials";
 import { getAlumniBySlug, getAlumni, getAllAlumniSlugs } from "@/lib/cms";
 import { extractTestimonialsFromAlumni } from "@/lib/testimonials-utils";
 import type { Testimonial } from "@/components/sections/testimonials/Testimonials";
+import { BackButton } from "@/components/shared/back-button";
 
 type PageParams = {
   slug: string;
@@ -37,6 +38,8 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
   const profile = await getAlumniBySlug(slug);
+
+// console.log("PROFILE DATA 👉", profile);
 
   if (!profile) return {};
 
@@ -115,6 +118,9 @@ export default async function AlumniProfilePage({ params }: PageProps) {
     <>
       <Navigation />
       <main className="bg-surface">
+          <div className="mx-auto max-w-[1180px] px-4 pt-6 sm:px-6 lg:px-8">
+    <BackButton label="Back to Alumni" />
+  </div>
         <AlumniProfileHero profile={profile} />
         <ProfileOverviewSection profile={profile} />
         <ProfileSessionsSection profile={profile} services={services} />

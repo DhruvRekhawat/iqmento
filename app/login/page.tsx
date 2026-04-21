@@ -23,6 +23,9 @@ function LoginForm() {
   const [phoneError, setPhoneError] = React.useState<string | null>(null);
   const [step, setStep] = React.useState<"phone" | "otp">("phone");
 
+  const [timer, setTimer] = React.useState(60);
+const [canResend, setCanResend] = React.useState(false);
+
   // Redirect when user is authenticated
   React.useEffect(() => {
     if (user) {
@@ -46,6 +49,23 @@ function LoginForm() {
       }
     }
   }, [user, next, router]);
+
+  React.useEffect(() => {
+  if (step !== "otp" || canResend) return;
+
+  const interval = setInterval(() => {
+    setTimer((prev) => {
+      if (prev <= 1) {
+        clearInterval(interval);
+        setCanResend(true);
+        return 0;
+      }
+      return prev - 1;
+    });
+  }, 1000);
+
+  return () => clearInterval(interval);
+}, [step, canResend]);
 
   const validatePhone = (value: string): boolean => {
     // Remove non-digits
@@ -96,7 +116,11 @@ function LoginForm() {
         }
       }
 
-      setStep("otp");
+     setStep("otp");
+
+// 🔥 start countdown
+setTimer(60);
+setCanResend(false);
     } catch {
       setError("Network error. Please try again.");
     }
@@ -186,14 +210,14 @@ function LoginForm() {
           />
           <div className="flex items-center justify-between text-xs text-foreground-muted">
             <span>OTP sent to {phone}</span>
-            <button
-              type="button"
-              onClick={handleSendOtp}
-              className="text-primary hover:underline"
-              disabled={isLoading}
-            >
-              Resend OTP
-            </button>
+      <button
+  type="button"
+  onClick={handleSendOtp}
+  disabled={!canResend || isLoading}
+  className="text-primary hover:underline disabled:opacity-50"
+>
+  {canResend ? "Resend OTP" : `Resend in ${timer}s`}
+</button>
           </div>
         </label>
       )}

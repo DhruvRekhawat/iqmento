@@ -3,13 +3,13 @@ import Link from "next/link";
 
 import { Container } from "@/components/shared/container";
 
-const NAV_LINKS = [
-  { label: "Home", href: "#hero" },
-  { label: "Special Offers", href: "#roadmap" },
-  { label: "Blog", href: "#testimonials" },
-  { label: "About Us", href: "#audience" },
-  { label: "Payment & Delivery", href: "#features" },
-  { label: "Contacts", href: "#footer" },
+ const NAV_LINKS = [
+  { label: "Home", href: "/" },
+  { label: "Special Offers", href: "/offers" },
+  { label: "Blog", href: "/blog" },
+  { label: "About Us", href: "/about-us" },
+  { label: "Payment & Delivery", href: "/payment-delivery" },
+  { label: "Contacts", href: "/login" },
 ];
 
 export function Footer() {
@@ -20,7 +20,7 @@ export function Footer() {
           
           {/* LEFT SECTION */}
           <div className="flex flex-col gap-6">
-            <Link href="#hero" className="text-[2.6rem] font-semibold tracking-[-0.03em] text-white">
+            <Link href="/" className="text-[2.6rem] font-semibold tracking-[-0.03em] text-white">
               Catalog<span className="ml-2 text-[#aab5ad]">↗</span>
             </Link>
 

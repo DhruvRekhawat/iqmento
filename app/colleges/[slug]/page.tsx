@@ -14,6 +14,7 @@ import {
 import { CallToAction } from "@/components/sections/cta";
 import { Footer } from "@/components/sections/footer";
 import { getCollegeBySlug, getAllCollegeSlugs, getAlumniRaw, mapDbAlumniToMentorCard } from "@/lib/cms";
+import { BackButton } from "@/components/shared/back-button";
 
 type PageParams = {
   slug: string;
@@ -73,6 +74,9 @@ export default async function CollegeDetailPage({ params }: PageProps) {
     <>
       <Navigation />
       <main className="bg-surface">
+          <div className="px-6 pt-4">
+    <BackButton/>
+  </div>
         <CollegeHero profile={profile} />
         <OverviewAndCoursesSection about={profile.about} courses={profile.courses} />
         <AdmissionProcessSection admission={profile.admission} />
