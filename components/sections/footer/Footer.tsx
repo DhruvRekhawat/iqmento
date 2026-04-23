@@ -3,7 +3,7 @@ import Link from "next/link";
 
 import { Container } from "@/components/shared/container";
 
- const NAV_LINKS = [
+const NAV_LINKS = [
   { label: "Home", href: "/" },
   { label: "Special Offers", href: "/offers" },
   { label: "Blog", href: "/blog" },
@@ -96,16 +96,16 @@ export function Footer() {
                 alt="Explore our success"
                 width={1060}
                 height={180}
-                className="h-full w-full object-cover"
+                className="h-full w-full object-contain sm:object-cover" // ✅ FIXED HERE
               />
 
-             <div className="absolute inset-0 flex items-center justify-between px-4 sm:px-6 md:px-10 pt-2 sm:pt-0">
+              <div className="absolute inset-0 flex items-center justify-between px-4 sm:px-6 md:px-10"> {/* ✅ FIXED HERE */}
                 
-             <div className="flex flex-col gap-0 text-left text-white leading-tight">
-               <span className="text-sm sm:text-base font-medium tracking-[-0.01em]">
+                <div className="flex flex-col gap-0 text-left text-white leading-tight">
+                  <span className="text-xs sm:text-base font-medium tracking-[-0.01em]"> {/* ✅ FIXED */}
                     Explore
                   </span>
-                <span className="text-sm sm:text-base font-medium tracking-[-0.01em]">
+                  <span className="text-xs sm:text-base font-medium tracking-[-0.01em]"> {/* ✅ FIXED */}
                     our success
                   </span>
                 </div>

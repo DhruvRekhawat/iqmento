@@ -185,7 +185,7 @@ export function CollegesExplorer({ colleges }: CollegesExplorerProps) {
       <div className="flex flex-col gap-12">
         <div className="flex flex-col gap-6">
           {/* Filter dropdowns — horizontal scroll on mobile */}
-          <div className="flex flex-wrap gap-3 overflow-x-auto pb-1 sm:flex-wrap sm:overflow-visible">
+          <div className="flex flex-wrap gap-3 md:flex-nowrap">
             <FilterDropdown
               label="College Type"
               isOpen={openDropdown === "collegeType"}
@@ -412,7 +412,7 @@ function FilterDropdown({
       <button
         type="button"
         onClick={onToggle}
-        className={`flex items-center gap-2 rounded-2xl border px-5 py-3 text-sm font-medium transition-colors whitespace-nowrap ${
+    className={`w-full flex items-center justify-between gap-2 rounded-2xl border px-4 py-3 text-sm font-medium transition-colors ${  
           isActive
             ? "border-[#4f39f6] bg-[#edeaff] text-[#2f23a8]"
             : "border-[#d7dae2] bg-white text-[#535353] hover:border-[#b9bed1]"
