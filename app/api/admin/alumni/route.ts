@@ -41,15 +41,43 @@ export async function GET(request: NextRequest) {
   const [alumni, total] = await Promise.all([
     prisma.alumni.findMany({
       where,
-      skip: (page - 1) * pageSize,
-      take: pageSize,
+      skip: search ? 0 : (page - 1) * pageSize,
+      take: search ? 500 : pageSize,
       orderBy: { createdAt: "desc" },
       include: { college: { select: { id: true, name: true, slug: true } } },
     }),
     prisma.alumni.count({ where }),
   ]);
 
-  return NextResponse.json({ alumni, total, page, pageSize });
+  let result = alumni;
+
+  if (search) {
+    const q = search.toLowerCase();
+
+    const score = (a: (typeof alumni)[0]): number => {
+      const name = (a.name ?? "").toLowerCase();
+      const headline = (a.headline ?? "").toLowerCase();
+      const company = (a.currentCompany ?? "").toLowerCase();
+      const loc = (a.location ?? "").toLowerCase();
+
+      if (name === q) return 100;
+      if (name.startsWith(q)) return 80;
+      if (name.includes(q)) return 60;
+      if (headline.includes(q) || company.includes(q)) return 40;
+      if (loc === q) return 35;
+      if (loc.startsWith(q)) return 30;
+      if (loc.includes(q)) return 20;
+      return 0;
+    };
+
+    result = alumni
+      .map((a) => ({ a, s: score(a) }))
+      .sort((x, y) => y.s - x.s || x.a.name.localeCompare(y.a.name))
+      .map(({ a }) => a)
+      .slice((page - 1) * pageSize, page * pageSize);
+  }
+
+  return NextResponse.json({ alumni: result, total, page, pageSize });
 }
 
 export async function POST(request: NextRequest) {

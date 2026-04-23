@@ -28,21 +28,50 @@ export async function GET(request: NextRequest) {
       { name: { contains: search } },
       { location: { contains: search } },
       { shortName: { contains: search } },
+      { name: { contains: search.toLowerCase() } },
+      { name: { contains: search.toUpperCase() } },
+      { shortName: { contains: search.toLowerCase() } },
+      { shortName: { contains: search.toUpperCase() } },
     ];
   }
 
   const [colleges, total] = await Promise.all([
     prisma.college.findMany({
       where,
-      skip: (page - 1) * pageSize,
-      take: pageSize,
+      skip: search ? 0 : (page - 1) * pageSize,
+      take: search ? 500 : pageSize,
       orderBy: { createdAt: "desc" },
       include: { _count: { select: { alumni: true } } },
     }),
     prisma.college.count({ where }),
   ]);
 
-  return NextResponse.json({ colleges, total, page, pageSize });
+  let result = colleges;
+
+  if (search) {
+    const q = search.toLowerCase();
+
+    const score = (c: (typeof colleges)[0]): number => {
+      const name = (c.name ?? "").toLowerCase();
+      const short = (c.shortName ?? "").toLowerCase();
+      const loc = (c.location ?? "").toLowerCase();
+
+      if (name === q || short === q) return 100;
+      if (name.startsWith(q) || short.startsWith(q)) return 80;
+      if (name.includes(q) || short.includes(q)) return 60;
+      if (loc.startsWith(q)) return 40;
+      if (loc.includes(q)) return 20;
+      return 0;
+    };
+
+    result = colleges
+      .map((c) => ({ c, s: score(c) }))
+      .sort((a, b) => b.s - a.s || a.c.name.localeCompare(b.c.name))
+      .map(({ c }) => c)
+      .slice((page - 1) * pageSize, page * pageSize);
+  }
+
+  return NextResponse.json({ colleges: result, total, page, pageSize });
 }
 
 export async function POST(request: NextRequest) {
