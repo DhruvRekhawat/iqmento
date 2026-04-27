@@ -47,9 +47,10 @@ const AUDIENCE_CARDS: AudienceCardConfig[] = [
     wrapperClass:
       "md:flex-none md:w-[380px] md:max-w-none md:z-20 md:translate-y-8",
     imageWrapperClass:
-      "h-[180px] sm:h-[220px] md:h-[360px] md:w-[calc(100%+48px)] overflow-hidden",
-    imageClassName:
-      "scale-100 sm:scale-110 md:scale-[1.2] sm:-translate-y-[20px] md:-translate-y-8",
+  "h-[220px] sm:h-[240px] md:h-[360px] md:w-[calc(100%+48px)] overflow-hidden",
+
+imageClassName:
+  "scale-[1.2] sm:scale-110 md:scale-[1.2] -translate-y-2 sm:-translate-y-[20px] md:-translate-y-8",
   },
   {
     title: "Alumni Mentors",
