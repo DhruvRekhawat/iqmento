@@ -34,6 +34,7 @@ export async function Alumni() {
       });
     }
   }
+
   return (
     <Section
       id="alumni"
@@ -42,7 +43,9 @@ export async function Alumni() {
       bleed
       className="text-white"
     >
-      <div className="relative isolate flex flex-col gap-12 overflow-hidden rounded-[36px] bg-linear-to-b from-white via-white to-[#c9b9ff] px-8 py-16 text-foreground sm:px-12">
+      {/* ✅ mobile padding only changed */}
+      <div className="relative isolate flex flex-col gap-12 overflow-hidden rounded-[36px] bg-linear-to-b from-white via-white to-[#c9b9ff] px-4 sm:px-12 py-12 sm:py-16 text-foreground">
+        
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(124,88,255,0.18)_0%,rgba(255,255,255,0)_62%)]" />
 
         <header className="relative z-10 flex flex-col items-center gap-4 text-center">
@@ -58,12 +61,15 @@ export async function Alumni() {
 
         <div className="relative z-10">
           {mentors.length > 0 ? (
-            <div className="overflow-hidden bg-white/60 p-4 sm:p-6 shadow-[0_40px_120px_rgba(110,70,255,0.16)] backdrop-blur-xl sm:marquee-mask">
-              <div className="marquee-track gap-6">
+            <div className="overflow-hidden bg-white/60 p-3 sm:p-6 shadow-[0_40px_120px_rgba(110,70,255,0.16)] backdrop-blur-xl sm:marquee-mask">
+              
+              {/* ✅ gap adjusted only for mobile */}
+              <div className="marquee-track gap-4 sm:gap-6">
                 {[...mentors, ...mentors].map((mentor, idx) => (
                   <MentorCard key={`${mentor.slug}-${idx}`} {...mentor} />
                 ))}
               </div>
+
             </div>
           ) : (
             <div className="rounded-lg bg-white/60 p-8 text-center text-black/60">
@@ -99,8 +105,10 @@ function MentorCard({
   image,
 }: MentorCardProps) {
   return (
-    <article className="relative flex w-[280px] shrink-0 flex-col overflow-hidden rounded-[28px] border border-[rgba(16,19,34,0.06)] bg-white shadow-[0_24px_60px_rgba(26,30,61,0.08)] transition-transform duration-300 hover:-translate-y-2">
-      <div className="relative h-44 overflow-hidden rounded-[24px] rounded-b-none">
+    <article className="relative flex w-[85vw] max-w-[280px] sm:w-[280px] shrink-0 flex-col overflow-hidden rounded-[28px] border border-[rgba(16,19,34,0.06)] bg-white shadow-[0_24px_60px_rgba(26,30,61,0.08)] transition-transform duration-300 hover:-translate-y-2">
+      
+      {/* ✅ image height fixed only for mobile */}
+      <div className="relative h-40 sm:h-44 overflow-hidden rounded-[24px] rounded-b-none">
         <Image
           src={image}
           alt={name}
@@ -140,4 +148,3 @@ function MentorCard({
     </article>
   );
 }
-
