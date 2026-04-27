@@ -202,7 +202,7 @@
   .marquee-track {
     display: inline-flex;
     min-width: max-content;
-    animation: marquee 40s linear infinite;
+    animation: marquee 50s linear infinite;
   }
 
   .marquee-track:hover {

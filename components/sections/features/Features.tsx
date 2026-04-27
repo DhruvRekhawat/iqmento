@@ -18,7 +18,7 @@ const FEATURES_COPY = [
     textClass: "text-[#78352C]",
   },
   {
-    title: "Talk to alumni who’ve cracked the admissions",
+    title: "Talk to alumni who've cracked the admissions",
     image: "/features/3.svg",
     gradient: "gradient-violet",
     textClass: "text-[#54278E]",
@@ -36,13 +36,12 @@ export function Features() {
     <Section id="features" className="relative">
       <div className="absolute inset-0 -z-10 bg-white/65" />
       <SectionHeader
-
         direction="row"
         title="Admissions are confusing. We make it simple."
-        description="College websites show glossy brochures. Coaching centers give generic advice. But what you need is honest, first-hand guidance from someone who’s actually studied there."
+        description="College websites show glossy brochures. Coaching centers give generic advice. But what you need is honest, first-hand guidance from someone who's actually studied there."
       />
 
-      <div className="mt-12 grid gap-4 md:mt-16 md:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-12 grid gap-4 grid-cols-2 md:mt-16 md:grid-cols-2 lg:grid-cols-4">
         {FEATURES_COPY.map((feature) => (
           <FeatureCard key={feature.title} {...feature} />
         ))}
@@ -66,29 +65,28 @@ function FeatureCard({ title, image, gradient, textClass }: FeatureCardProps) {
         gradient
       )}
     >
-      <div className="flex h-full flex-col px-4 pb-0">
+      <div className="flex h-full flex-col px-3 sm:px-4 pb-0">
         <h3
           className={cn(
-            "max-w-[320px] text-xl font-semibold leading-snug tracking-[-0.02em]",
+            "w-full text-sm sm:text-base md:text-xl font-semibold leading-snug tracking-[-0.02em] max-w-[320px]",
             textClass
           )}
         >
           {title}
         </h3>
 
-    <div className="relative bottom-0 w-full h-[220px] sm:h-[260px] md:h-[320px]">
-  <Image
-    src={image}
-    alt={title}
-    fill
-    className="object-contain object-bottom transition-transform duration-500 
-    scale-100 sm:scale-110 md:scale-130 
-    sm:-translate-y-[20px] md:-translate-y-[48px] 
-    group-hover:scale-110 md:group-hover:scale-135"
-  />
-</div>
+        <div className="relative bottom-0 w-full h-[140px] sm:h-[200px] md:h-[320px] mt-2 sm:mt-0">
+          <Image
+            src={image}
+            alt={title}
+            fill
+            className="object-contain object-bottom transition-transform duration-500
+            scale-100 sm:scale-110 md:scale-130
+            sm:-translate-y-[20px] md:-translate-y-[48px]
+            group-hover:scale-105 md:group-hover:scale-135"
+          />
+        </div>
       </div>
     </article>
   );
 }
-
