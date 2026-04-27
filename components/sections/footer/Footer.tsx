@@ -96,6 +96,7 @@ export function Footer() {
                 alt="Explore our success"
                 width={1060}
                 height={180}
+                priority
                 className="h-full w-full object-contain sm:object-cover" // ✅ FIXED HERE
               />
 
