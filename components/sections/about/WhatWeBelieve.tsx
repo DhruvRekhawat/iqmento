@@ -41,7 +41,7 @@ export function WhatWeBelieve() {
           </h2>
         </div>
 
-        <div className="grid flex-1 gap-6 lg:grid-cols-3">
+        <div className="mt-6 lg:mt-0 grid flex-1 gap-6 lg:grid-cols-3">
           {BELIEFS.map((belief) => (
             <article
               key={belief.copy.join("-")}
